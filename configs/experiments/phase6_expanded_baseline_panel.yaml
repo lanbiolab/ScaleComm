@@ -1,0 +1,21 @@
+extends: configs/experiments/phase2_revised_common.yaml
+experiment_id: phase6_expanded_baseline_panel
+output_dir: outputs/phase6/expanded_lr_universe/baselines
+
+datasets:
+  lymph_node_phase6_expanded:
+    dataset_root: outputs/phase6/expanded_lr_universe/datasets/human_lymph_node_visium_phase6_expanded_replicate_00
+
+spatialself:
+  epochs: 8
+  k_nn: 12
+  max_train_samples: 7000
+  pseudo_label_strategy: lr_prior_lr_capped_mechanism_niche_expression_distance
+  weak_positive_fraction: 0.10
+  ranking_loss_weight: 0.15
+  ranking_margin: 1.0
+  lr_cap_positive: 80
+  lr_cap_negative: 240
+
+commot:
+  cot_nitermax: 200

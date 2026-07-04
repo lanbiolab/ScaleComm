@@ -1,0 +1,92 @@
+phase: phase2_revised
+random_seed: 2026
+
+objective: reviewer-resistant SpatialSelf evidence chain
+
+canonical_goals:
+  goal1:
+    title: baseline_matched_biological_validation
+    artifact_families:
+      - goal1_baseline_matched_validation
+      - goal1_full_baseline_matched_validation
+      - goal1_full_baseline_matched_validation_all
+  goal2:
+    title: weak_signal_false_positive_tradeoff
+    artifact_families:
+      - goal2_weak_signal_tradeoff
+      - goal2_full_baseline_panel
+      - goal2_full_baseline_panel_all
+  goal3:
+    title: benchmark_simulator_v2
+    artifact_families:
+      - goal3_simulator_v2
+  goal4:
+    title: real_background_semisynthetic_benchmark
+    artifact_families:
+      - goal4_real_background_v2
+  goal5:
+    title: formal_fdr_calibration_module
+    artifact_families:
+      - goal5_formal_fdr
+      - goal5_fdr_200perm
+  goal6:
+    title: manuscript_evidence_figure_convergence
+    artifact_families:
+      - goal6_manuscript_assembly
+      - goal7_runtime_scalability
+    note: goal7_runtime_scalability is a historical output family retained as Goal 6 supporting runtime evidence.
+
+default_spatialself_candidate:
+  model: wavelet_calibrated_fdr
+  ranking: wavelet_mechanism_niche_edge_prior_ranking
+  operating_quantile: 0.94
+  fdr_level: group
+  primary_null: lr_identity_permutation
+  note: LR-balanced threshold remains diagnostic until realistic-background replicate stability supports it.
+
+baseline_methods:
+  retained:
+    - spatialself
+    - commot
+    - cellchat
+    - spatalk
+    - cellnest
+    - deeptalk
+    - niches
+  excluded:
+    - coexpression_distance_heuristic_as_baseline
+
+primary_metrics:
+  ground_truth:
+    - auroc
+    - aupr
+    - weak_signal_recall
+    - empirical_fdr
+    - high_expression_false_positive_rate
+    - top_k_precision
+  biological_validation:
+    - positive_control_rank
+    - negative_control_rank
+    - downstream_spearman
+    - empirical_fdr
+    - high_expression_false_positive_rate
+  fdr:
+    - empirical_p_value
+    - bh_fdr
+    - positive_control_power
+    - negative_control_fdr
+  efficiency:
+    - wall_clock_time
+    - peak_cpu_memory
+    - peak_gpu_memory
+    - candidate_edges
+    - lr_pairs
+
+artifact_policy:
+  save_predictions: true
+  save_truth_tables: true
+  save_metrics_table: true
+  save_summary_table: true
+  save_run_metadata: true
+  save_failure_reports: true
+  preserve_baseline_matched_inputs: true

@@ -1,0 +1,49 @@
+experiment_id: phase2_revised_goal2_replicated_tuned_baseline_jobs
+
+objective: executable job matrix for the next replicated tuned baseline panel
+output_dir: outputs/phase2_revised/goal2_replicated_tuned_baseline_jobs
+
+evidence_level: execution_plan_not_run_results
+
+inputs:
+  power_plan_overall: outputs/phase2_revised/goal2_replicate_power_plan/goal2_replicate_power_plan_overall.csv
+  real_background_config: configs/experiments/phase2_revised_goal4_real_background_v2.yaml
+  tuned_baseline_config: configs/experiments/phase2_revised_goal2_formal_tuned_small_panel.yaml
+  endpoint_policy_config: configs/experiments/phase2_revised_goal2_preregistered_endpoint_policy.yaml
+
+dataset_generation:
+  script: scripts/phase2/run_goal4_formal_real_background_v2.py
+  output_dir: outputs/phase2_revised/goal4_real_background_v2/replicated_tuned_datasets
+  seed: 9026
+  n_spots: 900
+  datasets:
+    - lymph_node
+    - tonsil
+    - melanoma
+  replicates_per_dataset: 6
+
+baseline_panel:
+  script: scripts/phase2/run_goal2_formal_tuned_small_panel.py
+  output_dir: outputs/phase2_revised/goal2_replicated_tuned_baseline_panel
+  dataset_name: real_background_v2_replicated_tuned
+  metric_methods:
+    - spatialself_wavelet_edge_prior
+    - spatialself_wavelet
+    - commot
+    - cellchat
+    - spatalk
+    - cellnest
+  status_methods:
+    - deeptalk
+    - niches
+
+execution_policy:
+  freeze_before_running:
+    - endpoint_policy
+    - tuned_baseline_parameters
+    - SpatialSelf_representative_rule
+    - random_seed
+    - failure_status_handling
+  expected_total_matched_replicates: 18
+  allow_partial_method_batches: true
+  claim_scope: plan_only_no_baseline_results

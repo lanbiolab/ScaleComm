@@ -1,0 +1,72 @@
+extends: configs/experiments/phase1_common.yaml
+experiment_id: exp07_lymph_node_global_validation
+
+objective: global validation on human lymph node before selected CCR7-CCL19 case study
+output_dir: outputs/phase1/exp07_lymph_node_global_validation
+
+dataset: human_lymph_node_visium
+
+global_analysis:
+  all_lr_pairs: true
+  region_enrichment_regions:
+    - T cell zone
+    - B follicle
+    - Germinal center
+    - Mixed
+  downstream_target_sources:
+    - nichenet
+    - reactome
+    - go
+    - omnipath
+
+case_studies:
+  - CCL19_CCR7
+  - CCL21_CCR7
+  - CXCL13_CXCR5
+
+metrics:
+  - region_enrichment_score
+  - downstream_target_spearman
+  - fdr
+  - top_lr_pathway_enrichment
+  - spatial_concentration_index
+  - method_ranking_across_all_lr_pairs
+
+implementation:
+  region_enrichment_runner: scripts/benchmark/run_region_enrichment.py
+  downstream_target_runner: scripts/benchmark/run_downstream_target_correlation.py
+  nichenet_target_extractor: scripts/benchmark/extract_nichenet_targets.py
+  spatialself_prediction_default:
+    pseudo_label_strategy: lr_prior_lr_capped_mechanism_niche_expression_distance
+    ranking_loss_weight: 0.35
+    ranking_margin: 0.5
+    weak_positive_fraction: 0.0
+    note: aligned with Phase 1 fair SpatialSelf default used in exp03, exp05, and exp06
+  current_outputs:
+    - "*__region_enrichment.csv"
+    - "*__lr_global_ranking.csv"
+    - "*__region_enrichment_summary.json"
+    - "*__downstream_target_correlation.csv"
+    - "*__downstream_target_status.csv"
+    - "*__downstream_target_summary.json"
+    - "*__nichenet_targets.csv"
+  full_slide_sparse_evidence:
+    dataset_dir: outputs/phase1/exp02_semisynthetic_real_background/full_slide_sparse_datasets
+    prediction_dir: outputs/phase1/exp07_lymph_node_global_validation/full_slide_sparse_prediction_inputs
+    region_enrichment_dir: outputs/phase1/exp07_lymph_node_global_validation/full_slide_sparse_region_enrichment
+    downstream_target_dir: outputs/phase1/exp07_lymph_node_global_validation/full_slide_sparse_downstream_target
+    control_summary_dir: outputs/phase1/exp07_lymph_node_global_validation/full_slide_sparse_control_summary
+    n_spots: 4035
+    n_candidate_interactions: 332328
+    methods:
+      - spatialself_wavelet
+      - spatialself_wavelet_edge_prior
+    downstream_positive_mean_spearman:
+      spatialself_wavelet: 0.763423
+      spatialself_wavelet_edge_prior: 0.764906
+    control_rank_summary: positive controls rank ahead of high-expression negative controls in both methods
+  current_status:
+    region_enrichment: implemented
+    downstream_target_correlation: implemented
+    nichenet_target_prior_extraction: implemented
+    pathway_enrichment: pending

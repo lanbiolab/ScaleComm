@@ -1,0 +1,100 @@
+experiment_id: phase4_manuscript_evidence_lock
+output_dir: outputs/phase4/manuscript_evidence_lock
+
+objective: harden Phase 3 scaffold outputs into submission-grade evidence without overstating current results
+
+representative_method: spatialself_wavelet_edge_prior
+
+retained_methods:
+  metric_methods:
+    - spatialself_wavelet_edge_prior
+    - spatialself_wavelet
+    - commot
+    - cellchat
+    - spatalk
+    - cellnest
+  status_methods:
+    - deeptalk
+    - niches
+  excluded_methods:
+    - lr_coexp
+
+submission_gates:
+  benchmark_replicates_min: 5
+  real_background_tissues_min: 3
+  real_background_replicates_per_tissue_min: 5
+  formal_fdr_permutations_min: 200
+  final_fdr_permutations_target: 500
+  required_null_models:
+    - spatial_permutation
+    - receiver_permutation
+    - lr_identity_permutation
+  required_mechanisms:
+    - juxtacrine_contact
+    - short_medium_paracrine
+    - long_range_chemokine_niche
+    - false_positive_high_expression
+  required_truth_metrics:
+    - auroc
+    - aupr
+    - weak_signal_recall_at_threshold
+    - empirical_fdr_at_threshold
+    - false_positive_high_expression_rate_at_threshold
+    - top_k_precision
+  required_real_validation_metrics:
+    - positive_control_rank
+    - negative_control_rank
+    - region_enrichment
+    - downstream_spearman
+    - fdr_significant_lr
+    - baseline_comparison
+
+source_artifacts:
+  phase3:
+    manifest: outputs/phase3/end_to_end/phase3_dataset_manifest.csv
+    prediction_index: outputs/phase3/end_to_end/phase3_prediction_index.csv
+    metric_index: outputs/phase3/end_to_end/phase3_metric_index.csv
+    fdr_index: outputs/phase3/end_to_end/phase3_fdr_index.csv
+    biological_validation_index: outputs/phase3/end_to_end/phase3_biological_validation_index.csv
+    manuscript_source_index: outputs/phase3/end_to_end/phase3_manuscript_source_table_index.csv
+    figure_index: outputs/phase3/end_to_end/phase3_figure_scaffold_index.csv
+    audit: outputs/phase3/end_to_end/audit/phase3_audit_summary.csv
+  phase2_revised:
+    controlled_simulator_summary: outputs/phase4/manuscript_evidence_lock/goal1_controlled_simulator_v2_5rep/formal_benchmark_summary.csv
+    controlled_simulator_manifest: outputs/phase4/manuscript_evidence_lock/goal1_controlled_simulator_v2_5rep/manifest.csv
+    real_background_summary: outputs/phase4/manuscript_evidence_lock/goal1_real_background_v2_5rep/formal_real_background_summary.csv
+    real_background_manifest: outputs/phase4/manuscript_evidence_lock/goal1_real_background_v2_5rep/manifest.csv
+    replicated_baseline_metrics: outputs/phase2_revised/goal2_replicated_tuned_baseline_panel/goal2_replicated_tuned_metric_summary.csv
+    replicated_baseline_tissue_metrics: outputs/phase2_revised/goal2_replicated_tuned_baseline_panel/goal2_replicated_tuned_tissue_metric_summary.csv
+    replicated_baseline_claims: outputs/phase2_revised/goal2_replicated_tuned_baseline_panel/goal2_replicated_tuned_claims.csv
+    weak_signal_tradeoff_claims: outputs/phase2_revised/goal2_weak_signal_tradeoff_readiness/goal2_weak_signal_tradeoff_claims.csv
+    real_background_fdr_100perm: outputs/phase2_revised/goal5_real_background_fdr_100perm/goal5_real_background_fdr_panel_summary.csv
+    fdr_200perm_smoke: outputs/phase2_revised/goal5_fdr_200perm/goal5_formal_fdr_summary.csv
+    fdr_500perm_key_panel: outputs/phase4/manuscript_evidence_lock/goal3_fdr_500perm_lymph_node/goal5_formal_fdr_summary.csv
+    fdr_500perm_key_group_summary: outputs/phase4/manuscript_evidence_lock/goal3_fdr_500perm_lymph_node/goal5_formal_fdr_group_summary.csv
+    biological_validation_claims: outputs/phase2_revised/goal1_biological_validation_readiness/goal1_biological_validation_claims.csv
+    downstream_claims: outputs/phase2_revised/goal1_curated_downstream_panel/goal1_curated_downstream_claims.csv
+    phase4_downstream_summary: outputs/phase4/manuscript_evidence_lock/goal5_downstream_key_lymph_node/phase4_downstream_key_lymph_node_summary.csv
+    phase4_downstream_claims: outputs/phase4/manuscript_evidence_lock/goal5_downstream_key_lymph_node/phase4_downstream_key_lymph_node_claims.csv
+    phase4_downstream_results: outputs/phase4/manuscript_evidence_lock/goal5_downstream_key_lymph_node/phase4_downstream_key_lymph_node_results.csv
+    runtime_claims: outputs/phase2_revised/goal7_runtime_scalability/goal7_runtime_scalability_claims.csv
+  phase4:
+    formal_ablation_summary: outputs/phase4/manuscript_evidence_lock/goal6_formal_ablation_controlled_5rep/spatialself_ablation_summary.csv
+    formal_ablation_metrics: outputs/phase4/manuscript_evidence_lock/goal6_formal_ablation_controlled_5rep/spatialself_ablation_metrics.csv
+    formal_ablation_status: outputs/phase4/manuscript_evidence_lock/goal6_formal_ablation_controlled_5rep/spatialself_ablation_status.csv
+    figure_render_qa: outputs/phase4/manuscript_evidence_lock/phase4_figure_render_qa.csv
+    figure_source_index: outputs/phase4/manuscript_evidence_lock/phase4_figure_source_index.csv
+    figure_render_summary: outputs/phase4/manuscript_evidence_lock/phase4_figure_render_summary.json
+
+phase4_goals:
+  - goal1_formalize_benchmarks
+  - goal2_strengthen_baselines
+  - goal3_upgrade_fdr
+  - goal4_weak_signal_evidence
+  - goal5_real_validation
+  - goal6_ablation_lock
+  - goal7_manuscript_figures
+
+claim_policy:
+  allowed_core_claim: SpatialSelf supports a calibrated weak-signal/false-positive tradeoff in realistic benchmark settings where source-table evidence passes Phase 4 gates.
+  disallowed_global_claim: SpatialSelf is globally best on every metric, every tissue, or every baseline.

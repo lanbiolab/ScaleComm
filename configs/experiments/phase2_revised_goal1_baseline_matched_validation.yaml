@@ -1,0 +1,30 @@
+extends: configs/experiments/phase2_revised_common.yaml
+experiment_id: phase2_revised_goal1_baseline_matched_validation
+
+objective: baseline-matched injected-control biological validation on real-background v2 datasets
+output_dir: outputs/phase2_revised/goal1_baseline_matched_validation
+
+datasets:
+  lymph_node_real_background_smoke:
+    replicate_dir: outputs/phase2_revised/goal4_real_background_v2/smoke_datasets/human_lymph_node_visium_replicate_00
+  tonsil_real_background_smoke:
+    replicate_dir: outputs/phase2_revised/goal4_real_background_v2/smoke_tonsil_datasets/human_tonsil_slide_tags_replicate_00
+  melanoma_real_background_smoke:
+    replicate_dir: outputs/phase2_revised/goal4_real_background_v2/smoke_melanoma_datasets/human_melanoma_multiome_replicate_00
+
+prediction_root: outputs/phase2_revised/goal2_weak_signal_tradeoff
+
+methods:
+  - spatialself_wavelet_edge_prior
+  - spatialself_wavelet
+  - commot
+
+metrics:
+  - positive_control_rank
+  - negative_control_rank
+  - negative_top3_count
+  - receiver_response_proxy_spearman
+  - empirical_fdr_at_q95
+  - high_expression_false_positive_rate_at_q95
+
+claim_level: injected_control_receiver_response_proxy_not_manuscript_ready

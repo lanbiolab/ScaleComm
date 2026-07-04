@@ -1,0 +1,53 @@
+experiment_id: phase6_spatialself_specific_discovery
+output_dir: outputs/phase6/spatialself_specific_discovery
+
+objective: identify SpatialSelf-specific top-ranked weak or context-specific LR communication missed by retained baselines
+
+primary_dataset: lymph_node_real_background_smoke
+primary_dataset_dir: outputs/phase4/manuscript_evidence_lock/goal1_real_background_v2_5rep/human_lymph_node_visium_replicate_00
+
+rank_policy:
+  level: lr_pair
+  aggregate: max_candidate_score
+  lower_rank_is_better: true
+  spatialself_topk: 10
+  baseline_min_rank: 11
+  absent_rank_policy: n_lr_pairs_plus_one
+
+weak_signal_policy:
+  ligand_expression_percentile_lt: 0.75
+  receptor_expression_percentile_lt: 0.75
+  lr_expression_product_percentile_lt: 0.60
+
+methods:
+  spatialself:
+    label: SpatialSelf
+    prediction_path: outputs/phase2_revised/goal2_full_baseline_panel_lymph_melanoma/lymph_node_real_background_smoke/spatialself_wavelet_edge_prior/human_lymph_node_visium_replicate_00__spatialself_wavelet_predictions.csv
+  commot:
+    label: COMMOT
+    prediction_path: outputs/phase2_revised/goal2_full_baseline_panel_lymph_melanoma/lymph_node_real_background_smoke/commot/human_lymph_node_visium_replicate_00__commot_predictions.csv
+  cellchat:
+    label: CellChat
+    prediction_path: outputs/phase2_revised/goal2_full_baseline_panel_lymph_melanoma/lymph_node_real_background_smoke/cellchat/human_lymph_node_visium_replicate_00__cellchat_predictions.csv
+  spatalk:
+    label: SpaTalk
+    prediction_path: outputs/phase2_revised/goal2_formal_baseline_panel_extended/real_background_v2_formal/spatalk/human_lymph_node_visium_replicate_00__spatalk_predictions.csv
+  cellnest:
+    label: CellNEST
+    prediction_path: outputs/phase2_revised/goal2_formal_baseline_panel_extended/real_background_v2_formal/cellnest/human_lymph_node_visium_replicate_00__cellnest_predictions.csv
+
+source_artifacts:
+  candidate_interactions: outputs/phase4/manuscript_evidence_lock/goal1_real_background_v2_5rep/human_lymph_node_visium_replicate_00/candidate_interactions.csv
+  lr_pairs: outputs/phase4/manuscript_evidence_lock/goal1_real_background_v2_5rep/human_lymph_node_visium_replicate_00/lr_pairs.csv
+  cells: outputs/phase4/manuscript_evidence_lock/goal1_real_background_v2_5rep/human_lymph_node_visium_replicate_00/cells.csv
+  expression: outputs/phase4/manuscript_evidence_lock/goal1_real_background_v2_5rep/human_lymph_node_visium_replicate_00/expression.csv
+  fdr_lr_pair_spatial: outputs/phase4/manuscript_evidence_lock/goal3_fdr_500perm_lymph_node/human_lymph_node_visium_replicate_00__spatialself_wavelet_predictions__spatial_permutation__lr_pair_direct_fdr.csv
+  fdr_lr_pair_receiver: outputs/phase4/manuscript_evidence_lock/goal3_fdr_500perm_lymph_node/human_lymph_node_visium_replicate_00__spatialself_wavelet_predictions__receiver_permutation__lr_pair_direct_fdr.csv
+  fdr_lr_pair_identity: outputs/phase4/manuscript_evidence_lock/goal3_fdr_500perm_lymph_node/human_lymph_node_visium_replicate_00__spatialself_wavelet_predictions__lr_identity_permutation__lr_pair_direct_fdr.csv
+  downstream_targets: outputs/phase4/manuscript_evidence_lock/goal5_downstream_key_lymph_node/human_lymph_node_visium_replicate_00__spatialself_wavelet_predictions__downstream_target_correlation.csv
+
+retained_baselines:
+  - commot
+  - cellchat
+  - spatalk
+  - cellnest

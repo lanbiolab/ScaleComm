@@ -1,0 +1,74 @@
+experiment_id: phase2_revised_goal2_preregistered_endpoint_policy
+
+objective: preregister endpoint policy for tuned baseline comparison before expanded replicate runs
+output_dir: outputs/phase2_revised/goal2_preregistered_endpoint_policy
+
+evidence_level: preregistered_policy_for_future_replicated_tuned_baseline
+
+source_panel:
+  name: formal_tuned_small_real_background
+  metrics: outputs/phase2_revised/goal2_formal_tuned_small_panel/goal2_formal_tuned_small_metrics.csv
+
+primary_endpoint:
+  name: fp_suppressed_retrieval_score
+  rationale: >
+    Primary comparison should reward retrieval quality while penalizing the
+    high-expression false positives that motivated the revised SpatialSelf
+    claim. It should not let a method win solely by assigning high scores to
+    nearly every weak positive when empirical FDR or high-expression false
+    positives are poor.
+  components:
+    aupr:
+      weight: 0.40
+      direction: higher_better
+    top_k_precision:
+      weight: 0.20
+      direction: higher_better
+    weak_signal_recall_at_threshold:
+      weight: 0.20
+      direction: higher_better
+    empirical_fdr_at_threshold:
+      weight: 0.10
+      direction: lower_better
+    false_positive_high_expression_rate_at_threshold:
+      weight: 0.10
+      direction: lower_better
+
+secondary_endpoints:
+  - aupr
+  - weak_signal_recall_at_threshold
+  - empirical_fdr_at_threshold
+  - false_positive_high_expression_rate_at_threshold
+  - top_k_precision
+  - calibration_error_10bin
+
+guardrails:
+  high_expression_fp_rate:
+    acceptable: 0.05
+    strict: 0.01
+  empirical_fdr:
+    acceptable: 0.65
+    strict: 0.50
+
+claim_rules:
+  primary_win:
+    description: method has the highest primary endpoint score at aggregate level
+  robust_win:
+    description: method wins primary endpoint in at least two of three real-background tissues
+  fp_suppression_support:
+    description: method is lowest or within 0.01 absolute high-expression FP of the lowest method in at least two tissues
+  no_overclaim:
+    - do not claim final tuned superiority from the tuned-small panel
+    - do not claim highest weak recall if weak recall is not the primary endpoint winner
+    - do not claim tissue-level dominance unless robust_win is true
+    - do not choose FP/FDR guardrails after seeing results without reporting sensitivity
+
+normalization:
+  method: minmax_per_scope
+  lower_better_transform: one_minus_minmax
+  missing_values: excluded_from_endpoint_scoring
+
+scope: >
+  This policy freezes the endpoint logic for future replicated tuned baseline
+  panels. Current tuned-small outputs are only used as a diagnostic application
+  of the policy, not as final manuscript superiority evidence.

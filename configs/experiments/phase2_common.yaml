@@ -1,0 +1,38 @@
+phase: phase2
+random_seed: 2026
+
+objective: manuscript-ready SpatialSelf model improvement and validation
+
+common_metrics:
+  ground_truth:
+    - auroc
+    - aupr
+    - weak_signal_recall
+    - empirical_fdr
+    - false_positive_high_expression_rate
+    - calibration_error
+  fdr:
+    - empirical_p_value
+    - bh_fdr
+    - p_value_uniformity
+    - positive_control_power
+    - negative_control_fdr
+  real_data:
+    - downstream_target_spearman
+    - region_enrichment
+    - spatial_concentration
+    - pathway_enrichment
+  efficiency:
+    - wall_clock_time
+    - peak_cpu_memory
+    - peak_gpu_memory
+    - candidate_edges
+    - lr_pairs
+
+artifact_policy:
+  save_predictions: true
+  save_metrics_table: true
+  save_summary_table: true
+  save_run_metadata: true
+  save_failure_reports: true
+  link_phase1_baselines: true

@@ -1,0 +1,56 @@
+extends: configs/experiments/phase2_revised_goal2_formal_baseline_panel.yaml
+experiment_id: phase2_revised_goal2_formal_tuned_small_panel
+
+objective: small tuned baseline panel on formal real-background v2 benchmark
+output_dir: outputs/phase2_revised/goal2_formal_tuned_small_panel
+
+evidence_level: formal_tuned_small_panel_not_final_replicated_baseline
+
+dataset:
+  name: real_background_v2_formal
+  dataset_root: outputs/phase2_revised/goal4_real_background_v2/formal_datasets
+
+methods:
+  metric_panel:
+    - spatialself_wavelet_edge_prior
+    - spatialself_wavelet
+    - commot
+    - cellchat
+    - spatalk
+    - cellnest
+  status_only:
+    - deeptalk
+    - niches
+
+tuned_small_parameters:
+  commot:
+    cot_nitermax: 500
+  cellchat:
+    nboot: 20
+  spatalk:
+    per_num: 100
+    min_pairs: 1
+    use_synthetic_pathways: false
+  cellnest:
+    num_epoch: 2
+    hidden: 32
+  spatialself:
+    epochs: 6
+    k_nn: 12
+    max_train_samples: 5000
+    pseudo_label_strategy: lr_prior_lr_capped_mechanism_niche_expression_distance
+    weak_positive_fraction: 0.0
+    ranking_loss_weight: 0.15
+    ranking_margin: 1.0
+    lr_cap_positive: 80
+    lr_cap_negative: 240
+
+tradeoff_guardrail:
+  max_high_expression_fp_rate: 0.05
+  max_empirical_fdr: 0.65
+
+claim_scope: >
+  This is a tuned small real-background panel over lymph node, tonsil, and
+  melanoma formal v2 replicates. It reduces the adapter-light concern for
+  CellChat, SpaTalk, and CellNEST, but it is not a final replicated manuscript
+  baseline comparison and does not replace larger seed/tile panels.

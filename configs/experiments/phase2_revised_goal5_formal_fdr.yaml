@@ -1,0 +1,33 @@
+extends: configs/experiments/phase2_revised_common.yaml
+experiment_id: phase2_revised_goal5_formal_fdr
+
+objective: formal FDR/calibration module with fixed spatial, receiver, and LR-identity nulls
+output_dir: outputs/phase2_revised/goal5_formal_fdr
+
+default_panel:
+  dataset: tonsil_real_background_smoke
+  replicate: human_tonsil_slide_tags_replicate_00
+  method: spatialself_wavelet_edge_prior
+  candidate_path: outputs/phase2_revised/goal4_real_background_v2/smoke_tonsil_datasets/human_tonsil_slide_tags_replicate_00/candidate_interactions.csv
+  prediction_path: outputs/phase2_revised/goal2_weak_signal_tradeoff/tonsil_real_background_smoke/spatialself_wavelet_edge_prior/human_tonsil_slide_tags_replicate_00__spatialself_wavelet_predictions.csv
+
+null_models:
+  - spatial_permutation
+  - receiver_permutation
+  - lr_identity_permutation
+
+fdr:
+  n_permutations: 20
+  random_seed: 2026
+  alpha: 0.05
+  score_column: score
+  direct_group_top_fraction: 0.1
+
+outputs:
+  - candidate_edge_fdr
+  - lr_pair_direct_fdr
+  - cell_type_pair_direct_fdr
+  - significant_lr_pairs
+  - significant_cell_type_pairs
+  - significant_spatial_edges
+  - fdr_summary

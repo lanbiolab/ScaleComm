@@ -1,0 +1,64 @@
+experiment_id: reference_scdesign3_panel
+output_dir: outputs/reference_based_benchmark/panel_scdesign3_reference_baseline
+
+objective: >
+  Lock a fair scDesign3-based reference benchmark panel before the next model
+  redesign. This panel keeps one unified SpatialSelf baseline and one strong
+  external comparator so later architecture changes can be judged against the
+  same reference task.
+
+datasets:
+  - dataset_id: lymph_scdesign3
+    tissue: lymph_node
+    dataset_root: outputs/reference_based_benchmark/smoke_scdesign3
+    replicate_dir: outputs/reference_based_benchmark/smoke_scdesign3/reference_lymph_node_scdesign3_replicate_00
+  - dataset_id: melanoma_scdesign3
+    tissue: melanoma
+    dataset_root: outputs/reference_based_benchmark/smoke_scdesign3_melanoma
+    replicate_dir: outputs/reference_based_benchmark/smoke_scdesign3_melanoma/reference_melanoma_scdesign3_replicate_00
+
+methods:
+  metric_panel:
+    - spatialself_wavelet_scale
+    - commot
+
+spatialself_reference_baseline:
+  display_name: SpatialSelf-scale
+  model_name: spatialself_wavelet_scale
+  epochs: 200
+  k_nn: 12
+  max_train_samples: 12000
+  pseudo_label_strategy: mechanism_niche_expression_distance
+  ranking_loss_weight: 0.0
+  ranking_margin: 1.0
+  feasibility_loss_weight: 0.0
+  hard_negative_loss_weight: 0.05
+  context_contrastive_loss_weight: 0.0
+  context_contrastive_margin: 0.5
+  context_contrastive_negative_mode: random_receiver
+  null_candidate_loss_weight: 0.0
+  mechanism_guard_loss_weight: 0.03
+  lr_cap_positive: 50
+  lr_cap_negative: 200
+  no_lr_embedding: false
+  no_distance: false
+  no_spatial_graph: false
+  no_expression_features: false
+
+commot:
+  cot_nitermax: 500
+
+range_evaluation:
+  top_k: 100
+  threshold_quantile: 0.95
+
+claim_scope: >
+  This panel is a fairness-first reference benchmark built on scDesign3
+  simulated expression backgrounds with injected LR mechanisms. The retained
+  SpatialSelf baseline is the scale-aware wavelet model with LR-specific
+  scale-mixture scoring.
+
+limitations:
+  - Only two smoke datasets are included in this locked reference panel so far.
+  - The panel is intended as a stable reference task for the scale-aware SpatialSelf baseline.
+  - Real-data validation remains observational and should be interpreted through spatial context and downstream response, not perturbation ground truth.

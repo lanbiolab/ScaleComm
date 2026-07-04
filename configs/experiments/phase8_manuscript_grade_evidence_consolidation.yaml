@@ -1,0 +1,20 @@
+phase: phase8
+name: manuscript_grade_evidence_consolidation
+output_dir: outputs/phase8/manuscript_grade_evidence_consolidation
+upstream_outputs:
+  phase4: outputs/phase4/manuscript_evidence_lock
+  phase5: outputs/phase5/manuscript_submission_lock
+  phase7: outputs/phase7/functional_cross_platform_validation
+goals:
+  goal1_core_story:
+    required_artifact: phase8_core_story_claims.csv
+  goal2_main_figures:
+    required_artifact: phase8_main_figure_plan.csv
+  goal3_real_case_deep_dive:
+    required_artifact: phase8_real_case_deep_dive_table.csv
+  goal4_deep_baseline_closure:
+    required_artifact: phase8_deep_baseline_closure_table.csv
+  goal5_claim_boundary:
+    required_artifact: phase8_claim_boundary_table.csv
+  goal6_methods_reproducibility:
+    required_artifact: phase8_methods_reproducibility_checklist.csv

@@ -1,0 +1,24 @@
+extends: configs/experiments/phase2_common.yaml
+experiment_id: p2_goal5_interpretability
+objective: test whether predicted CCC has biological structure beyond spatial colocalization
+output_dir: outputs/phase2/goal5_interpretability
+analyses:
+  - lr_target_downstream_validation
+  - lr_embedding_umap
+  - lr_embedding_clustering
+  - pathway_category_enrichment
+  - ccc_module_discovery
+  - mechanism_category_analysis
+status: initial_interpretability_evidence
+initial_artifact:
+  dataset: human_tonsil_slide_tags
+  analysis_label: tonsil_fresh_subset_downstream_interpretability
+  runner: scripts/phase2/run_goal5_tonsil_interpretability.py
+  output_dir: outputs/phase2/goal5_interpretability/tonsil_fresh_subset
+  limitation: mixed subset-level evidence; residual positive controls exceed housekeeping negatives, but broad background LR still show stronger downstream correlations
+embedding_artifact:
+  dataset: human_tonsil_slide_tags
+  analysis_label: lr_embedding_tonsil_fresh_subset
+  runner: scripts/phase2/run_goal5_lr_embedding_interpretability.py
+  output_dir: outputs/phase2/goal5_interpretability/lr_embedding_tonsil_fresh_subset
+  limitation: weak subset-level LR embedding structure; mechanism/control silhouettes are negative and no cluster enrichment is BH-significant

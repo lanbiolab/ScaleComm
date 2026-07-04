@@ -1,0 +1,111 @@
+experiment_id: phase3_end_to_end_manuscript_pipeline
+output_dir: outputs/phase3/end_to_end
+
+objective: run the manuscript evidence chain end to end before targeted optimization
+
+phase3_goals:
+  - goal1_dataset_manifest
+  - goal2_main_model_and_baselines
+  - goal3_unified_evaluation
+  - goal4_fdr_permutation
+  - goal5_biological_validation
+  - goal6_manuscript_tables_figures
+
+representative_method: spatialself_wavelet_edge_prior
+
+retained_methods:
+  metric_methods:
+    - spatialself_wavelet_edge_prior
+    - commot
+    - cellchat
+    - spatalk
+    - cellnest
+  status_methods:
+    - deeptalk
+    - niches
+
+dataset_sources:
+  controlled_simulator_v2:
+    dataset_type: controlled_simulator_v2
+    path: outputs/phase2_revised/goal3_simulator_v2/formal_datasets/replicate_00
+    intended_figure_panel: Fig2
+    required: true
+  real_background_lymph_node:
+    dataset_type: real_background_semisynthetic
+    path: outputs/phase2_revised/goal4_real_background_v2/formal_datasets/human_lymph_node_visium_replicate_00
+    tissue: lymph_node
+    intended_figure_panel: Fig3;Fig4;Fig5;Fig6;Fig7
+    required: true
+  real_background_tonsil:
+    dataset_type: real_background_semisynthetic
+    path: outputs/phase2_revised/goal4_real_background_v2/formal_datasets/human_tonsil_slide_tags_replicate_00
+    tissue: tonsil
+    intended_figure_panel: Fig3;Fig4;Fig5;Fig6;Fig7
+    required: true
+  real_background_melanoma:
+    dataset_type: real_background_semisynthetic
+    path: outputs/phase2_revised/goal4_real_background_v2/formal_datasets/human_melanoma_multiome_replicate_00
+    tissue: melanoma
+    intended_figure_panel: Fig3;Fig4;Fig5;Fig6;Fig7
+    required: true
+  high_resolution_tonsil_subset:
+    dataset_type: high_resolution_real_subset
+    path: outputs/phase2/goal4_high_resolution/tonsil_fresh_wavelet_calibrated_subset/constructed_replicate
+    tissue: tonsil
+    intended_figure_panel: Fig7;Fig8
+    required: true
+  optional_xenium_subset:
+    dataset_type: optional_high_resolution_placeholder
+    path: data/optional/xenium_subset
+    tissue: optional
+    intended_figure_panel: Fig8
+    required: false
+  optional_visium_hd_subset:
+    dataset_type: optional_high_resolution_placeholder
+    path: data/optional/visium_hd_subset
+    tissue: optional
+    intended_figure_panel: Fig8
+    required: false
+
+manifest:
+  output_csv: outputs/phase3/end_to_end/phase3_dataset_manifest.csv
+  output_json: outputs/phase3/end_to_end/phase3_dataset_manifest.json
+  required_columns:
+    - dataset_id
+    - dataset_type
+    - path
+    - n_cells
+    - n_lr_pairs
+    - n_candidate_edges
+    - has_ground_truth
+    - has_injected_controls
+    - available_labels
+    - intended_figure_panel
+
+fdr:
+  smoke_permutations: 20
+  representative_permutations: 100
+  null_models:
+    - spatial_permutation
+    - receiver_permutation
+    - lr_identity_permutation
+
+figures:
+  - figure_id: Fig1
+    title: method overview / benchmark schema
+  - figure_id: Fig2
+    title: simulator v2 benchmark
+  - figure_id: Fig3
+    title: real-background benchmark
+  - figure_id: Fig4
+    title: baseline comparison
+  - figure_id: Fig5
+    title: weak signal versus false-positive tradeoff
+  - figure_id: Fig6
+    title: FDR calibration
+  - figure_id: Fig7
+    title: biological validation
+  - figure_id: Fig8
+    title: runtime / scalability
+
+claim_level: end_to_end_pipeline_scaffold_not_final_manuscript

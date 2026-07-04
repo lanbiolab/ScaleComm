@@ -1,0 +1,60 @@
+extends: configs/experiments/phase2_revised_goal2_weak_signal_tradeoff.yaml
+experiment_id: phase2_revised_goal2_full_baseline_panel
+
+objective: adapter-aware full baseline panel for revised Phase 2 weak-signal benchmark
+output_dir: outputs/phase2_revised/goal2_full_baseline_panel
+
+evidence_level: adapter_aware_smoke_not_final_tuned_baseline
+
+datasets:
+  controlled_v2:
+    dataset_root: outputs/phase2_revised/goal3_simulator_v2/datasets
+  lymph_node_real_background_smoke:
+    dataset_root: outputs/phase2_revised/goal4_real_background_v2/smoke_datasets
+  tonsil_real_background_smoke:
+    dataset_root: outputs/phase2_revised/goal4_real_background_v2/smoke_tonsil_datasets
+  melanoma_real_background_smoke:
+    dataset_root: outputs/phase2_revised/goal4_real_background_v2/smoke_melanoma_datasets
+
+methods:
+  required_for_manuscript:
+    - spatialself_wavelet_edge_prior
+    - spatialself_wavelet
+    - commot
+    - cellchat
+    - spatalk
+    - cellnest
+    - deeptalk
+    - niches
+  runnable_candidate_or_projected:
+    - spatialself_wavelet_edge_prior
+    - spatialself_wavelet
+    - commot
+    - cellchat
+    - spatalk
+    - cellnest
+  projection_or_status_only:
+    deeptalk: requires LR-specific predict_ccc outputs before it becomes a metric-producing baseline
+    niches: local R dependency is currently unreproducible; record blocked status explicitly
+    nichenet: downstream validation only, not a candidate-edge scoring baseline
+
+adapter_light_defaults:
+  cellchat_nboot: 5
+  spatalk_per_num: 20
+  cellnest_num_epoch: 1
+  cellnest_hidden: 16
+
+metrics:
+  - auroc
+  - aupr
+  - weak_signal_recall_at_threshold
+  - empirical_fdr_at_threshold
+  - false_positive_high_expression_rate_at_threshold
+  - top_k_precision
+  - calibration_error_10bin
+
+interpretation_guardrail: >
+  This panel records runnable adapter-light and status-only evidence for methods
+  requested by reviewers. It is not a final tuned baseline comparison until
+  CellChat, SpaTalk, CellNEST, DeepTalk, and NICHES are either run at manuscript
+  scale or documented with reproducible failure reasons.

@@ -1,0 +1,51 @@
+# Python/runtime
+__pycache__/
+*.py[cod]
+*.log
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.SpatialVenv/
+.venv/
+venv/
+
+# Local data and generated analysis outputs
+outputs/
+data/
+HumanMelannomaMultiome/
+high_spatial/
+mouse/
+lung_cancer/
+downstreamgene_eva/
+visium_lr_benchmark/
+fig/
+vendor/
+omnipathr-log/
+skills/
+*.h5ad
+*.h5
+*.loom
+*.zarr/
+*.mtx
+*.parquet
+*.feather
+*.rds
+*.RData
+
+# Large manuscript/export artifacts
+manuscript/gb_scalecomm/build/
+*.tif
+*.tiff
+
+# Local reference/working material
+article_figures/
+Reference_Fig/
+参考图_全部/
+/*.png
+/=1.13.3
+*.part
+
+# OS/editor
+.DS_Store
+*~

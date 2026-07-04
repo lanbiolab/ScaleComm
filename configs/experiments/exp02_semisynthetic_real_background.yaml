@@ -1,0 +1,77 @@
+extends: configs/experiments/phase1_common.yaml
+experiment_id: exp02_semisynthetic_real_background
+
+objective: semi-synthetic benchmark with real spatial coordinates and expression background
+output_dir: outputs/phase1/exp02_semisynthetic_real_background
+
+semisynthetic_generator:
+  dataset_name: human_lymph_node_visium
+  h5ad_path: Human_Lymph_Node.h5ad
+  region_csv: visium_lr_benchmark/spot_region_from_c2l.csv
+  output_dir: outputs/phase1/exp02_semisynthetic_real_background/datasets
+  n_spots: 1200
+  n_background_genes: 2000
+  background_gene_selection: mean_variance_random
+  required_gene_csvs: []
+  max_candidate_range_quantile: 0.08
+  negative_edge_fraction: 0.25
+  candidate_generation: full_radius
+  max_candidates_per_lr:
+  max_candidates_per_sender_lr: 64
+  expression_boost_strong: 8.0
+  expression_boost_weak: 3.0
+
+full_slide_sparse_evidence:
+  output_dir: outputs/phase1/exp02_semisynthetic_real_background/full_slide_sparse_datasets
+  realism_dir: outputs/phase1/exp02_semisynthetic_real_background/full_slide_sparse_realism
+  n_spots: 4035
+  n_background_genes: 2000
+  candidate_generation: sparse_sampled
+  max_candidates_per_lr: 120000
+  max_candidates_per_sender_lr: 64
+  candidate_interactions: 332328
+  positive_interactions: 91721
+  weak_positive_interactions: 49538
+  false_positive_labels: 0
+  mean_observed_sparsity: 0.5184
+  cell_types: 6
+  regions: 4
+  realism_summary:
+    genes_compared: 2010
+    lr_genes_compared: 10
+    selected_library_size_pearson: 0.999998
+    cell_sparsity_pearson: 0.999991
+    background_gene_mean_pearson: 1.0
+    background_gene_sparsity_pearson: 1.0
+    background_moran_pearson: 1.0
+    median_lr_gene_mean_shift: 1.948947
+
+background_datasets:
+  - human_lymph_node_visium
+  - human_tonsil_slide_tags
+  - melanoma_multiome
+
+preserve_real_properties:
+  - coordinates
+  - cell_type_composition
+  - expression_sparsity
+  - library_size
+  - local_density
+
+injections:
+  - name: t_zone_ccr7_ccl19_like
+    dataset: human_lymph_node_visium
+  - name: gc_fdc_b_cell_like
+    dataset: human_lymph_node_visium
+  - name: tumor_immune_boundary_macrophage_t_cell
+    dataset: melanoma_multiome
+  - name: false_positive_high_expression_pairs
+    dataset: all
+
+metrics:
+  - auroc
+  - aupr
+  - fdr
+  - spatial_localization_accuracy
+  - weak_signal_recall
+  - false_positive_suppression

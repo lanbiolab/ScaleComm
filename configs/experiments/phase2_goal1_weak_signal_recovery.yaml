@@ -1,0 +1,56 @@
+extends: configs/experiments/phase2_common.yaml
+experiment_id: p2_goal1_weak_signal_recovery
+
+objective: improve SpatialSelf weak-signal recovery without unacceptable FDR inflation
+output_dir: outputs/phase2/goal1_weak_signal_recovery
+
+phase1_reference:
+  controlled_edge_prior_weak_recall: 0.155
+  full_slide_sparse_edge_prior_weak_recall: 0.040
+
+datasets:
+  controlled_smoke: outputs/phase1/exp01_controlled_benchmark/smoke_datasets
+  controlled_full: outputs/phase1/exp01_controlled_benchmark/datasets
+  full_slide_sparse_semisynthetic: outputs/phase1/exp02_semisynthetic_real_background/full_slide_sparse_datasets
+
+candidate_models:
+  - phase1_default_wavelet
+  - phase1_edge_prior_wavelet
+  - weak_mining_wavelet
+  - weak_mining_edge_prior_wavelet
+  - focal_weak_mining_wavelet
+  - focal_weak_mining_edge_prior_wavelet
+  - lr_balanced_focal_wavelet
+  - gat_reference
+
+training_axes:
+  pseudo_label_strategy:
+    - lr_prior_lr_capped_mechanism_niche_expression_distance
+  weak_positive_mining:
+    - none
+    - weak_like_proxy
+    - soft_weak_like_proxy
+  sampling:
+    - balanced_global
+    - balanced_per_lr
+  loss:
+    - bce
+    - focal_bce
+  ranking:
+    - none
+    - lrwise_weak_vs_hard_negative
+
+success_criteria:
+  controlled_weak_recall_gt: 0.155
+  full_slide_sparse_weak_recall_gt: 0.040
+  fdr_increase_max_absolute: 0.05
+  false_positive_rate_increase_max_absolute: 0.02
+
+implementation:
+  runner: scripts/phase2/run_goal1_weak_signal_recovery.py
+  spatialself_runner: scripts/benchmark/run_spatialself.py
+  initial_smoke_output: outputs/phase2/goal1_weak_signal_recovery/smoke_controlled
+  output_tables:
+    - weak_signal_recovery_metrics.csv
+    - weak_signal_recovery_summary.csv
+    - weak_signal_recovery_status.csv

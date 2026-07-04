@@ -1,0 +1,95 @@
+extends: configs/experiments/phase1_common.yaml
+experiment_id: exp04_model_ablation
+
+objective: ablate model components and pseudo-label strategy
+output_dir: outputs/phase1/exp04_model_ablation
+
+datasets:
+  - exp01_controlled_benchmark
+  - exp02_semisynthetic_real_background
+
+model_variants:
+  - full_spatialself
+  - spatialself_wavelet
+  - spatialself_wavelet_gat
+  - no_lr_embedding
+  - fixed_random_lr_embedding
+  - one_hot_lr_identity
+  - no_spatial_graph
+  - no_distance_feature
+  - gcn_instead_of_gat
+  - mlp_instead_of_gat
+  - wavelet_only_no_gat
+  - heuristic_pseudo_label_only
+  - expression_distance_without_lr_identity
+
+wavelet:
+  diffusion_steps:
+    - 1
+    - 2
+    - 4
+    - 8
+  undirected_base_graph: true
+  interpretation:
+    step_1: contact_scale
+    step_2: short_paracrine_scale
+    step_4: medium_paracrine_scale
+    step_8: long_niche_scale
+
+pseudo_label_strategies:
+  - top_k_bottom_k
+  - top_quantile_bottom_quantile
+  - soft_pseudo_label
+  - hard_pseudo_label
+  - expression_only
+  - distance_only
+  - expression_times_distance
+  - hard_negative_sampling
+  - weak_signal_reweighting
+
+metrics:
+  - auroc
+  - aupr
+  - fdr
+  - weak_signal_recall
+  - background_false_positive_rate
+  - downstream_target_correlation
+
+implementation:
+  runner: scripts/benchmark/run_spatialself_ablation.py
+  spatialself_runner: scripts/benchmark/run_spatialself.py
+  current_registered_ablations:
+    - gat_hard_expression_distance
+    - wavelet_hard_expression_distance
+    - wavelet_no_lr_embedding
+    - wavelet_no_distance
+    - wavelet_no_spatial_graph
+    - wavelet_no_expression_features
+    - wavelet_expression_distance_no_lr_identity
+    - wavelet_expression_only
+    - wavelet_distance_only
+    - wavelet_expression_plus_distance
+    - wavelet_soft_expression_distance
+    - wavelet_lr_balanced_expression_distance
+    - wavelet_lr_balanced_soft_expression_distance
+    - wavelet_lr_capped_expression_distance
+    - wavelet_lr_capped_expression_plus_distance
+    - wavelet_lr_capped_weak_reweighted
+    - wavelet_lr_capped_q80_weak_reweighted
+    - wavelet_lr_capped_wide
+    - wavelet_lr_capped_wide_q80_weak_reweighted
+    - wavelet_lr_prior_hard_negative
+    - wavelet_mechanism_niche_lr_capped
+    - wavelet_mechanism_niche_lr_prior
+    - wavelet_mechanism_niche_lr_prior_ranking
+    - wavelet_mechanism_niche_lr_prior_lrwise_ranking
+    - wavelet_mechanism_niche_weak_augmented
+    - wavelet_mechanism_niche_soft_weak_augmented
+    - wavelet_mechanism_niche_edge_prior
+    - wavelet_mechanism_niche_edge_prior_soft_weak
+    - wavelet_mechanism_niche_weak_augmented_ranking
+    - wavelet_mechanism_niche_soft_weak_augmented_ranking
+    - wavelet_mechanism_niche_edge_prior_ranking
+    - wavelet_lr_prior_q80_weak_reweighted
+    - wavelet_weak_reweighted
+  output_table: spatialself_ablation_metrics.csv

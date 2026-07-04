@@ -1,0 +1,187 @@
+extends: configs/experiments/phase1_common.yaml
+experiment_id: exp08_runtime_memory
+
+objective: runtime and memory scaling benchmark
+output_dir: outputs/phase1/exp08_runtime_memory
+
+scales:
+  smoke_cell_or_spot_counts:
+    - 120
+    - 240
+  cell_or_spot_counts:
+    - 1000
+    - 5000
+    - 10000
+    - 50000
+    - 100000
+  lr_pair_counts:
+    - 50
+    - 100
+    - 500
+    - 1000
+
+methods:
+  - spatialself
+  - spatialself_wavelet
+  - commot
+  - cellchat
+  - cellnest
+  - deeptalk
+  - niches
+
+metrics:
+  - wall_clock_time
+  - peak_cpu_memory
+  - peak_gpu_memory
+  - number_of_candidate_edges
+  - number_of_lr_pairs
+  - runtime_per_epoch
+  - total_runtime
+  - method_status
+  - failure_reason
+
+implementation:
+  profiler: scripts/benchmark/profile_runtime_memory.py
+  scaling_runner: scripts/benchmark/run_runtime_scaling.py
+  spatialself_default:
+    pseudo_label_strategy: lr_prior_lr_capped_mechanism_niche_expression_distance
+    ranking_loss_weight: 0.35
+    ranking_margin: 0.5
+    weak_positive_fraction: 0.0
+  current_runnable_adapters:
+    - spatialself_wavelet
+    - spatialself_wavelet_edge_prior
+    - spatialself_gat
+    - commot
+    - cellchat
+    - cellnest
+    - deeptalk
+  pending_model_or_external_adapters:
+    - spatialself
+    - niches
+    - nichenet
+  current_full_evidence:
+    controlled_medium_scaling: outputs/phase1/exp08_runtime_memory/controlled_medium_scaling/runtime_memory_scaling.csv
+    scales:
+      - 500
+      - 1000
+    methods:
+      - spatialself_wavelet
+      - spatialself_wavelet_edge_prior
+      - spatialself_gat
+      - commot
+    max_candidate_edges: 926654
+  current_sparse_evidence:
+    sparse_spatialself_scaling: outputs/phase1/exp08_runtime_memory/sparse_spatialself_scaling/runtime_memory_scaling.csv
+    sparse_50k_spatialself_gat_profile: outputs/phase1/exp08_runtime_memory/sparse_50k_spatialself_gat_sparse_knn_profile/runtime_memory_profile.csv
+    sparse_50k_spatialself_wavelet_profile: outputs/phase1/exp08_runtime_memory/sparse_50k_spatialself_wavelet_profile/runtime_memory_profile.csv
+    sparse_50k_highcap_spatialself: outputs/phase1/exp08_runtime_memory/sparse_50k_highcap_spatialself/runtime_memory_scaling.csv
+    sparse_100k_spatialself_smoke: outputs/phase1/exp08_runtime_memory/sparse_100k_spatialself_smoke/runtime_memory_scaling.csv
+    full_slide_sparse_semisynthetic_retained_profile: outputs/phase1/exp08_runtime_memory/full_slide_sparse_semisynthetic_retained_profile/runtime_memory_profile.csv
+    candidate_generation: sparse_sampled
+    scales:
+      - 1000
+      - 5000
+      - 10000
+    methods:
+      - spatialself_wavelet
+      - spatialself_wavelet_edge_prior
+      - spatialself_gat
+    max_candidate_edges: 130223
+    sparse_50k_gat:
+      scale: 50000
+      candidate_edges: 130790
+      wall_clock_seconds: 10.861
+      peak_cpu_memory_mb: 4433.5
+      implementation_note: SpatialSelf KNN graph construction uses scipy.spatial.cKDTree rather than an all-pairs distance matrix
+    sparse_50k_wavelet:
+      scale: 50000
+      candidate_edges: 130790
+      wall_clock_seconds: 8.052
+      peak_cpu_memory_mb: 1268.3
+    sparse_50k_wavelet_edge_prior:
+      scale: 50000
+      candidate_edges: 130790
+      wall_clock_seconds: 8.771
+      peak_cpu_memory_mb: 1281.8
+    sparse_50k_highcap_wavelet:
+      scale: 50000
+      candidate_edges: 326963
+      wall_clock_seconds: 10.757
+      peak_cpu_memory_mb: 1353.6
+      max_candidates_per_lr: 50000
+      max_candidates_per_sender_lr: 48
+    sparse_50k_highcap_wavelet_edge_prior:
+      scale: 50000
+      candidate_edges: 326963
+      wall_clock_seconds: 10.120
+      peak_cpu_memory_mb: 1340.0
+      max_candidates_per_lr: 50000
+      max_candidates_per_sender_lr: 48
+    sparse_50k_highcap_gat:
+      scale: 50000
+      candidate_edges: 326963
+      wall_clock_seconds: 11.779
+      peak_cpu_memory_mb: 4585.6
+      max_candidates_per_lr: 50000
+      max_candidates_per_sender_lr: 48
+    sparse_100k_wavelet:
+      scale: 100000
+      candidate_edges: 130547
+      wall_clock_seconds: 10.876
+      peak_cpu_memory_mb: 2062.6
+    sparse_100k_wavelet_edge_prior:
+      scale: 100000
+      candidate_edges: 130547
+      wall_clock_seconds: 11.828
+      peak_cpu_memory_mb: 2037.5
+    sparse_100k_gat:
+      scale: 100000
+      candidate_edges: 130547
+      wall_clock_seconds: 12.569
+      peak_cpu_memory_mb: 8386.8
+    full_slide_sparse_retained:
+      spots: 4035
+      candidate_edges: 332328
+      lr_pairs: 5
+      completed_methods:
+        spatialself_wavelet:
+          wall_clock_seconds: 20.861
+          peak_cpu_memory_mb: 2537.9
+        spatialself_wavelet_edge_prior:
+          wall_clock_seconds: 20.924
+          peak_cpu_memory_mb: 2611.5
+        spatialself_gat:
+          wall_clock_seconds: 10.815
+          peak_cpu_memory_mb: 1070.4
+        commot:
+          wall_clock_seconds: 501.330
+          peak_cpu_memory_mb: 4392.7
+        cellchat:
+          wall_clock_seconds: 27.637
+          peak_cpu_memory_mb: 1117.5
+        spatalk:
+          wall_clock_seconds: 170.222
+          peak_cpu_memory_mb: 2448.1
+        cellnest:
+          wall_clock_seconds: 78.599
+          peak_cpu_memory_mb: 806.4
+        deeptalk:
+          wall_clock_seconds: 43.036
+          peak_cpu_memory_mb: 988.9
+      non_candidate_edge_runtime:
+        nichenet: pending_adapter
+        niches: optional_blocked
+    caveat: capped candidates; extend to real high-resolution subsets, still higher candidate caps, and broader baselines before manuscript scalability claims
+  output_table: runtime_memory_profile.csv
+  scaling_output_table: runtime_memory_scaling.csv
+  notes:
+    - Full-radius controlled scaling is capped at 10k cells because it materializes all-pairs distances.
+    - Sparse sampled candidate generation is available for 50k and 100k controlled profiling smoke tests.
+    - DeepTalk runtime currently measures projection/status unless LR-specific model files are supplied.
+  sparse_candidate_generation:
+    candidate_generation: sparse_sampled
+    max_controlled_scale: 100000
+    controls:
+      - max_candidates_per_lr
+      - max_candidates_per_sender_lr

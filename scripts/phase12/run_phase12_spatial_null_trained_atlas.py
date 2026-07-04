@@ -1,0 +1,285 @@
+#!/usr/bin/env python
+"""Run a spatial-null-contrastive SpatialSelf variant on expanded Phase 12 atlases."""
+
+from __future__ import annotations
+
+import json
+import shutil
+import sys
+import time
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+import pandas as pd
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from scripts.benchmark.run_spatialself import run_spatialself_on_replicate  # noqa: E402
+import scripts.phase12.calibrate_phase12_expanded_atlas_ranking as calibrator  # noqa: E402
+import scripts.phase12.run_phase12_atlas_model_expanded as expanded  # noqa: E402
+import scripts.phase12.run_phase12_atlas_model_pilot as pilot  # noqa: E402
+
+
+OUT_DIR = PROJECT_ROOT / "outputs/phase12/atlas_model_expanded_spatial_null_trained"
+REPLICATE_ROOT = OUT_DIR / "replicates"
+PRED_ROOT = OUT_DIR / "predictions"
+TOP_K_VALUES = (10, 20, 50, 100)
+
+
+def main() -> None:
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    REPLICATE_ROOT.mkdir(parents=True, exist_ok=True)
+    PRED_ROOT.mkdir(parents=True, exist_ok=True)
+
+    all_status: list[dict[str, Any]] = []
+    all_ranking: list[pd.DataFrame] = []
+    all_hard: list[pd.DataFrame] = []
+
+    for spec in expanded.DATASETS:
+        started = time.perf_counter()
+        dataset_key = str(spec["dataset_key"])
+        try:
+            src_replicate = expanded.OUT_DIR / "replicates" / dataset_key
+            replicate_dir = REPLICATE_ROOT / dataset_key
+            if replicate_dir.exists():
+                shutil.rmtree(replicate_dir)
+            shutil.copytree(src_replicate, replicate_dir)
+            rewrite_metadata(replicate_dir, spec)
+
+            pred_dir = PRED_ROOT / dataset_key / "spatialself_wavelet_edge_prior_spatial_null_trained"
+            if pred_dir.exists():
+                shutil.rmtree(pred_dir)
+            metrics = run_spatialself_on_replicate(
+                replicate_dir,
+                pred_dir,
+                model_name="spatialself_wavelet",
+                k_nn=18,
+                epochs=4,
+                positive_quantile=0.9,
+                negative_quantile=0.2,
+                pseudo_label_strategy="lr_prior_lr_capped_mechanism_niche_expression_distance",
+                train_sampling_strategy="balanced_per_lr",
+                weak_signal_reweighting=2.0,
+                weak_positive_fraction=0.15,
+                weak_positive_label=0.75,
+                weak_positive_mode="non_contact",
+                ranking_loss_weight=0.12,
+                feasibility_loss_weight=0.12,
+                hard_negative_loss_weight=0.16,
+                context_contrastive_loss_weight=0.10,
+                context_contrastive_margin=0.5,
+                context_contrastive_negative_mode="hard_receiver",
+                lr_identity_contrastive_loss_weight=0.06,
+                lr_identity_contrastive_margin=0.35,
+                control_contrastive_loss_weight=0.14,
+                control_contrastive_margin=0.5,
+                null_candidate_loss_weight=0.08,
+                spatial_null_contrastive_loss_weight=0.16,
+                spatial_null_contrastive_margin=0.55,
+                lr_cap_positive=16,
+                lr_cap_negative=45,
+                use_edge_prior_features=True,
+                max_train_samples=14000,
+                seed=1312,
+            )
+            pred_path = Path(metrics["prediction_path"])
+            ranking = calibrate_variant_dataset(dataset_key, replicate_dir, pred_path)
+            hard = pilot.summarize_hard_negative(replicate_dir, ranking, dataset_key)
+            all_ranking.append(ranking)
+            all_hard.append(hard)
+            all_status.append(
+                {
+                    "dataset_key": dataset_key,
+                    "status": "completed",
+                    "runtime_seconds": float(time.perf_counter() - started),
+                    "replicate_dir": rel(replicate_dir),
+                    "prediction_path": rel(pred_path),
+                    "n_candidates": int(metrics.get("n_candidates", 0)),
+                    "n_spatial_null_contrastive_train": int(metrics.get("n_spatial_null_contrastive_train", 0)),
+                    "n_context_contrastive_train": int(metrics.get("n_context_contrastive_train", 0)),
+                    "n_hard_negative_train": int(metrics.get("n_hard_negative_train", 0)),
+                    "n_control_contrastive_train": int(metrics.get("n_control_contrastive_train", 0)),
+                    "error": "",
+                }
+            )
+        except Exception as exc:  # noqa: BLE001
+            all_status.append(
+                {
+                    "dataset_key": dataset_key,
+                    "status": "failed",
+                    "runtime_seconds": float(time.perf_counter() - started),
+                    "replicate_dir": "",
+                    "prediction_path": "",
+                    "n_candidates": 0,
+                    "n_spatial_null_contrastive_train": 0,
+                    "n_context_contrastive_train": 0,
+                    "n_hard_negative_train": 0,
+                    "n_control_contrastive_train": 0,
+                    "error": repr(exc),
+                }
+            )
+
+    ranking_table = pd.concat(all_ranking, ignore_index=True) if all_ranking else pd.DataFrame()
+    hard_table = pd.concat(all_hard, ignore_index=True) if all_hard else pd.DataFrame()
+    status_table = pd.DataFrame(all_status)
+    topk = calibrator.summarize_topk(ranking_table)
+    dataset = calibrator.summarize_dataset(ranking_table, topk, hard_table, status_table)
+    comparison = compare_to_main(dataset)
+
+    status_table.to_csv(OUT_DIR / "phase12_spatial_null_trained_status.csv", index=False)
+    ranking_table.to_csv(OUT_DIR / "phase12_spatial_null_trained_calibrated_lr_ranking.csv", index=False)
+    hard_table.to_csv(OUT_DIR / "phase12_spatial_null_trained_hard_negative_leakage.csv", index=False)
+    topk.to_csv(OUT_DIR / "phase12_spatial_null_trained_topk_summary.csv", index=False)
+    dataset.to_csv(OUT_DIR / "phase12_spatial_null_trained_dataset_summary.csv", index=False)
+    comparison.to_csv(OUT_DIR / "phase12_spatial_null_trained_comparison_to_main.csv", index=False)
+    write_status(status_table, dataset, comparison)
+    write_manifest()
+
+    print(status_table.to_string(index=False))
+    print()
+    print(dataset.to_string(index=False))
+    print()
+    print(comparison.to_string(index=False))
+
+
+def calibrate_variant_dataset(dataset_key: str, replicate_dir: Path, pred_path: Path) -> pd.DataFrame:
+    ranking = calibrator.calibrate_dataset(dataset_key, replicate_dir, pred_path)
+    ranking["method"] = "spatialself_wavelet_edge_prior_spatial_null_trained_calibrated"
+    return ranking
+
+
+def compare_to_main(dataset: pd.DataFrame) -> pd.DataFrame:
+    main_path = PROJECT_ROOT / "outputs/phase12/atlas_model_expanded/phase12_expanded_atlas_calibrated_dataset_summary.csv"
+    if dataset.empty or not main_path.exists():
+        return pd.DataFrame()
+    main = pd.read_csv(main_path)
+    cols = [
+        "dataset_key",
+        "top10_true_lr",
+        "top10_high_expression_negative",
+        "top10_broad_other_lr",
+        "top10_negative_or_risk_fraction",
+        "top10_control_panel_empirical_fdr",
+        "top50_true_lr",
+        "top50_negative_or_risk_fraction",
+        "hard_negative_best_comparison_beats",
+    ]
+    merged = dataset[cols].merge(main[cols], on="dataset_key", how="left", suffixes=("_spatial_null", "_main"))
+    merged["delta_top10_true_lr"] = merged["top10_true_lr_spatial_null"] - merged["top10_true_lr_main"]
+    merged["delta_top10_risk_fraction"] = (
+        merged["top10_negative_or_risk_fraction_spatial_null"]
+        - merged["top10_negative_or_risk_fraction_main"]
+    )
+    merged["delta_top50_true_lr"] = merged["top50_true_lr_spatial_null"] - merged["top50_true_lr_main"]
+    merged["delta_hard_negative_beats"] = (
+        merged["hard_negative_best_comparison_beats_spatial_null"]
+        - merged["hard_negative_best_comparison_beats_main"]
+    )
+    merged["comparison_call"] = [
+        comparison_call(row) for row in merged.itertuples(index=False)
+    ]
+    return merged
+
+
+def comparison_call(row: object) -> str:
+    delta_true = float(getattr(row, "delta_top10_true_lr", 0.0))
+    delta_risk = float(getattr(row, "delta_top10_risk_fraction", 0.0))
+    if delta_true > 0 and delta_risk <= 0:
+        return "ranking_improved_without_top10_risk"
+    if delta_true >= 0 and delta_risk < 0:
+        return "risk_reduced_without_true_loss"
+    if delta_true < 0 or delta_risk > 0:
+        return "tradeoff_or_worse"
+    return "similar_to_main"
+
+
+def rewrite_metadata(replicate_dir: Path, spec: dict[str, Any]) -> None:
+    metadata_path = replicate_dir / "metadata.json"
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8")) if metadata_path.exists() else {}
+    metadata.update(
+        {
+            "dataset_key": spec["dataset_key"],
+            "purpose": "Phase 12 expanded atlas spatial-null-contrastive training variant",
+            "claim_boundary": "Training variant for Goal 1 calibration; requires exact null audit before discovery-FDR claims.",
+        }
+    )
+    metadata_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+
+
+def write_status(status: pd.DataFrame, dataset: pd.DataFrame, comparison: pd.DataFrame) -> None:
+    lines = [
+        "# Phase 12 Spatial-Null-Trained Expanded Atlas",
+        "",
+        "## Dataset Status",
+        "",
+    ]
+    for row in status.itertuples(index=False):
+        lines.append(
+            f"- `{row.dataset_key}`: {row.status}; spatial-null pairs={int(row.n_spatial_null_contrastive_train)}; "
+            f"runtime={float(row.runtime_seconds):.1f}s"
+        )
+        if str(getattr(row, "error", "")):
+            lines.append(f"  - error: {row.error}")
+    if not dataset.empty:
+        lines += ["", "## Calibrated Ranking Summary", ""]
+        for row in dataset.itertuples(index=False):
+            lines.append(
+                f"- `{row.dataset_key}`: top10 true={int(row.top10_true_lr)}, "
+                f"top10 risk={float(row.top10_negative_or_risk_fraction):.3g}, "
+                f"top50 true={int(row.top50_true_lr)}, hard-neg beats={int(row.hard_negative_best_comparison_beats)}."
+            )
+    if not comparison.empty:
+        lines += ["", "## Comparison To Main Calibrated Ranking", ""]
+        for row in comparison.itertuples(index=False):
+            lines.append(
+                f"- `{row.dataset_key}` `{row.comparison_call}`: "
+                f"delta top10 true={int(row.delta_top10_true_lr)}, "
+                f"delta top10 risk={float(row.delta_top10_risk_fraction):.3g}, "
+                f"delta hard-neg beats={int(row.delta_hard_negative_beats)}."
+            )
+    lines += [
+        "",
+        "## Boundary",
+        "",
+        "- This is a full expanded-atlas training variant with spatial-null contrastive loss.",
+        "- It is still a ranking/control audit until exact-score or end-to-end permutation FDR is rerun.",
+    ]
+    (OUT_DIR / "phase12_spatial_null_trained_status.md").write_text(
+        "\n".join(lines) + "\n",
+        encoding="utf-8",
+    )
+
+
+def write_manifest() -> None:
+    manifest = {
+        "task": "phase12_spatial_null_trained_atlas",
+        "outputs": [
+            rel(OUT_DIR / "phase12_spatial_null_trained_status.csv"),
+            rel(OUT_DIR / "phase12_spatial_null_trained_calibrated_lr_ranking.csv"),
+            rel(OUT_DIR / "phase12_spatial_null_trained_hard_negative_leakage.csv"),
+            rel(OUT_DIR / "phase12_spatial_null_trained_topk_summary.csv"),
+            rel(OUT_DIR / "phase12_spatial_null_trained_dataset_summary.csv"),
+            rel(OUT_DIR / "phase12_spatial_null_trained_comparison_to_main.csv"),
+            rel(OUT_DIR / "phase12_spatial_null_trained_status.md"),
+        ],
+        "claim_boundary": "Full expanded-atlas training variant; not FDR closure without null audit.",
+    }
+    (OUT_DIR / "phase12_spatial_null_trained_manifest.json").write_text(
+        json.dumps(manifest, indent=2),
+        encoding="utf-8",
+    )
+
+
+def rel(path: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(PROJECT_ROOT))
+    except ValueError:
+        return str(path)
+
+
+if __name__ == "__main__":
+    main()

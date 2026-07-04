@@ -1,0 +1,15 @@
+extends: configs/experiments/phase2_common.yaml
+experiment_id: p2_goal3_model_selection
+objective: select the Phase 2 default SpatialSelf model across controlled, semi-synthetic, and lymph-node evidence
+output_dir: outputs/phase2/goal3_model_selection
+candidate_models:
+  - wavelet_default
+  - wavelet_edge_prior
+  - wavelet_weak_mining
+  - wavelet_calibrated_fdr
+  - gat_reference
+  - hybrid_wavelet_gat
+  - no_lr_identity
+  - no_distance
+  - no_expression
+status: planned

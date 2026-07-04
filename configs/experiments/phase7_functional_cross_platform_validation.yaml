@@ -1,0 +1,140 @@
+experiment_id: phase7_functional_cross_platform_validation
+output_dir: outputs/phase7/functional_cross_platform_validation
+
+objective: >
+  Upgrade SpatialSelf evidence from benchmark/ranking performance to downstream
+  functional validation and cross-platform weak/context-specific CCC discovery.
+
+goals:
+  goal1_downstream_target_validation:
+    output_dir: outputs/phase7/functional_cross_platform_validation/goal1_downstream_target_validation
+    target_resources:
+      - nichenet
+      - omnipath
+      - reactome
+      - kegg
+      - cellchatdb
+    key_lr_panels:
+      lymph_node:
+        - CCL19_CCR7_Tzone_semisynthetic
+        - CCL21_CCR7_Tzone_phase6_weak
+        - CXCL13_CXCR5_GC_semisynthetic_weak
+        - CD48_CD244_Tcell_phase6_contact_weak
+      tonsil:
+        - IL21_IL21R
+        - CD40LG_CD40
+        - CXCL13_CXCR5
+      melanoma:
+        - CXCL9_CXCR3
+        - CXCL10_CXCR3
+        - SPP1_CD44
+        - PDCD1_CD274
+    required_methods:
+      - spatialself
+      - commot
+      - cellchat
+      - spatalk
+      - cellnest
+    metrics:
+      - spearman_incoming_score_vs_receiver_target_signature
+      - permutation_p_value
+      - bh_fdr
+      - positive_negative_control_delta
+
+  goal2_deep_baseline_closure:
+    output_dir: outputs/phase7/functional_cross_platform_validation/goal2_deep_baseline_closure
+    formal_targets:
+      - deeptalk
+    status_targets:
+      - deeptalk
+      - holonet
+      - stmlnet
+      - cytosignal
+      - niches
+    status_columns:
+      - method
+      - code_availability
+      - version_or_source
+      - dependency_reproducibility
+      - input_compatibility
+      - output_level
+      - lr_pair_ranking_support
+      - cell_or_spot_level_support
+      - runtime_memory_status
+      - final_status
+      - exact_failure_reason
+      - output_path
+
+  goal3_benchmark_realism_figure:
+    output_dir: outputs/phase7/functional_cross_platform_validation/goal3_benchmark_realism_figure
+    backgrounds:
+      - lymph_node
+      - tonsil
+      - melanoma
+    statistics:
+      - library_size_distribution
+      - expression_sparsity
+      - mean_variance_relationship
+      - nearest_neighbor_distance
+      - spatial_density
+      - morans_i_distribution
+      - lr_expression_distribution
+      - pca_umap_overlap
+
+  goal4_cross_background_spatialself_specific_discovery:
+    output_dir: outputs/phase7/functional_cross_platform_validation/goal4_cross_background_spatialself_specific_discovery
+    target_backgrounds:
+      - tonsil
+      - melanoma
+    strict_screen:
+      spatialself_rank_lte: 10
+      baseline_rank_gt_or_absent: 10
+      exclude_high_expression_trivial: true
+      require_weak_or_context_specific: true
+      require_region_or_niche_enrichment: true
+      require_downstream_target_validation_or_missing_target_reason: true
+      require_fdr_support: true
+    retained_baselines:
+      - commot
+      - cellchat
+      - spatalk
+      - cellnest
+
+  goal5_cross_platform_real_data:
+    output_dir: outputs/phase7/functional_cross_platform_validation/goal5_cross_platform_real_data
+    priority_platforms:
+      - xenium_human_lymph_node
+      - visium_hd_crc
+      - cosmx_melanoma
+      - merfish_or_seqfish_or_slideseqv2
+    minimum_outputs:
+      - dataset_manifest
+      - control_panel
+      - spatialself_predictions
+      - retained_baseline_predictions_or_status
+      - region_or_niche_enrichment
+      - downstream_target_response
+      - fdr_or_feasibility_note
+      - runtime_memory_summary
+      - source_tables
+
+source_artifacts:
+  phase6_expanded_dataset_dir: outputs/phase6/expanded_lr_universe/datasets/human_lymph_node_visium_phase6_expanded_replicate_00
+  phase6_discovery_dir: outputs/phase6/spatialself_specific_discovery_expanded
+  curated_lr_targets: configs/phase4_curated_lr_targets.csv
+  existing_nichenet_targets_dir: outputs/phase1/exp07_lymph_node_global_validation/full_slide_sparse_nichenet_targets
+  existing_real_background_v2_dir: outputs/phase2_revised/goal4_real_background_v2/formal_datasets
+  existing_baseline_panel_dir: outputs/phase2_revised/goal2_formal_baseline_panel
+  existing_fdr_panel_dir: outputs/phase2_revised/goal5_real_background_fdr_panel
+
+claim_boundary:
+  allowed: >
+    SpatialSelf supports weak/context-specific CCC discoveries with downstream
+    target-response evidence and FDR support in selected realistic benchmark
+    and cross-platform settings.
+  disallowed:
+    - SpatialSelf is universally best across all CCC methods and datasets.
+    - Target-signature validation proves perturbation causality.
+    - Real ST platforms provide complete native ground truth.
+    - Failed baselines are biologically inferior.
+

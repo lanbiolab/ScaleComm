@@ -1,0 +1,7 @@
+figure_id	file_stem	story	source_path
+Fig1	fig1_method_overview	ScaleComm learns LR-specific spatial scale and context, then outputs calibrated and interpretable communication readouts.	outputs/manuscript_method_figure_overview_aligned_v7/scalecomm_method_overview_aligned_v7
+Fig2	fig2_benchmark	Mechanism-aware benchmark across contact, short-range, medium-range and long-niche LR communication.	outputs/reference_based_benchmark/scdesign3_mechanism_200lr/main_figure_v15/scdesign3_200lr_main_benchmark_figure_v15
+Fig3	fig3_crc_visium_hd	Visium HD CRC TGFB1-TGFBR2 communication aligns with stromal/ECM/TGF-beta response.	outputs/manuscript_final_figures/fig2_crc_visium_hd/fig2_crc_visium_hd_tgfb1_tgfbr2_v9_response_coupling
+Fig4	fig4_dss_merfish	MERFISH DSS time course recovers stage-specific inflammatory and repair communication programs.	outputs/manuscript_final_figures/fig3_dss_merfish/fig3_mouse_colon_merfish_dss_v5_unified
+Fig5	fig5_cosmx_nsclc	CosMx NSCLC demonstrates learned scale/context gates in real single-cell spatial data.	outputs/manuscript_final_figures/fig4_cosmx_nsclc/fig4_cosmx_nsclc_scale_context_v13_reference_full_tissue_style
+Fig6	fig6_tonsil_spamosaic	SPAMOSAIC tonsil localizes CXCL13-CXCR5 communication to GC/B-cell context with response support.	outputs/manuscript_final_figures/fig5_spamosaic_tonsil/tonsil_cxcl13_cxcr5_scalecomm_story

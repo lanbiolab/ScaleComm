@@ -1,0 +1,50 @@
+extends: configs/experiments/phase2_revised_common.yaml
+experiment_id: phase2_revised_goal2_weak_signal_tradeoff
+
+objective: weak-signal and high-expression false-positive tradeoff on v2 benchmarks
+output_dir: outputs/phase2_revised/goal2_weak_signal_tradeoff
+
+datasets:
+  controlled_v2:
+    dataset_root: outputs/phase2_revised/goal3_simulator_v2/datasets
+  lymph_node_real_background_smoke:
+    dataset_root: outputs/phase2_revised/goal4_real_background_v2/smoke_datasets
+  tonsil_real_background_smoke:
+    dataset_root: outputs/phase2_revised/goal4_real_background_v2/smoke_tonsil_datasets
+  melanoma_real_background_smoke:
+    dataset_root: outputs/phase2_revised/goal4_real_background_v2/smoke_melanoma_datasets
+
+methods:
+  default_smoke:
+    - spatialself_wavelet_edge_prior
+    - spatialself_wavelet
+    - commot
+  later_full_panel:
+    - cellchat
+    - spatalk
+    - cellnest
+    - deeptalk
+    - niches
+
+spatialself:
+  epochs: 8
+  k_nn: 12
+  max_train_samples: 6000
+  pseudo_label_strategy: lr_prior_lr_capped_mechanism_niche_expression_distance
+  weak_positive_fraction: 0.0
+  ranking_loss_weight: 0.15
+  ranking_margin: 1.0
+  lr_cap_positive: 80
+  lr_cap_negative: 240
+
+commot:
+  cot_nitermax: 200
+
+metrics:
+  - auroc
+  - aupr
+  - weak_signal_recall_at_threshold
+  - empirical_fdr_at_threshold
+  - false_positive_high_expression_rate_at_threshold
+  - top_k_precision
+  - tradeoff_score

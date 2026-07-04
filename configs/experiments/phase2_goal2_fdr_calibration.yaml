@@ -1,0 +1,17 @@
+extends: configs/experiments/phase2_common.yaml
+experiment_id: p2_goal2_fdr_calibration
+objective: calibrate empirical p-values and BH-FDR so positive controls can be significant while negatives remain controlled
+output_dir: outputs/phase2/goal2_fdr_calibration
+null_models:
+  - score_permutation
+  - spatial_permutation
+  - receiver_permutation
+  - lr_identity_permutation
+  - within_region_permutation
+  - cell_type_preserving_permutation
+group_levels:
+  - candidate_edge
+  - lr_pair
+  - cell_type_pair
+  - pathway_module
+status: planned

@@ -1,0 +1,1189 @@
+#!/usr/bin/env python
+"""CellNEST Fig.2-style CRC communication story for TGFB1-TGFBR2."""
+
+from __future__ import annotations
+
+import argparse
+import os
+import sys
+from pathlib import Path
+
+os.environ.setdefault("PANDAS_USE_BOTTLENECK", "0")
+os.environ.setdefault("PANDAS_USE_NUMEXPR", "0")
+sys.modules["numexpr"] = None
+sys.modules["bottleneck"] = None
+
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap, Normalize
+from matplotlib.gridspec import GridSpecFromSubplotSpec
+from matplotlib.path import Path as MplPath
+from matplotlib.patches import FancyArrowPatch, PathPatch, Patch, Rectangle
+import numpy as np
+import pandas as pd
+from scipy import stats
+from scipy.spatial import cKDTree
+
+import scalecomm_figure_style as scf
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+GOAL7_DIR = PROJECT_ROOT / "outputs/phase7/functional_cross_platform_validation/goal5_cross_platform_real_data"
+DEFAULT_DATASET_DIR = GOAL7_DIR / "standardized_inputs/visium_hd_crc_p2crc_rich_targets_subset"
+DEFAULT_PHASE15_DIR = PROJECT_ROOT / "outputs/current_visium_hd_crc_disagreement_validation_scale_v21"
+DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "outputs/manuscript_experiment_figures_unified_v9/fig2_crc_visium_hd"
+ARTICLE_CRC_SOURCE = PROJECT_ROOT / "outputs/article_style_figure_additions/crc_visium_hd_article_style/source_data"
+ARTICLE_EXTRA_SOURCE = PROJECT_ROOT / "outputs/article_style_figure_additions/high_priority_remaining/source_data"
+
+LR_ID = "visium_hd_crc_lr_003_TGFB1_TGFBR2"
+LR_LABEL = "TGFB1-TGFBR2"
+TARGET_NICHE = "tumor_stromal_boundary"
+TARGET_NICHE_LABEL = "tumor-stromal boundary"
+STORY_CELL_TYPE = "caf_proxy"
+STORY_CELL_TYPE_LABEL = "CAF / stromal"
+
+PREDICTIONS = {
+    "spatialself": GOAL7_DIR
+    / "visium_hd_crc_p2crc_spatialself_scale_v21/spatialself_wavelet_scale/"
+    "visium_hd_crc_p2crc_rich_targets_subset__spatialself_wavelet_scale_predictions.csv",
+    "commot": GOAL7_DIR / "visium_hd_crc_p2crc_baseline_panel/commot/visium_hd_crc_p2crc_subset__commot_predictions.csv",
+    "cellnest": GOAL7_DIR
+    / "visium_hd_crc_p2crc_baseline_panel/cellnest/visium_hd_crc_p2crc_subset__cellnest_predictions.csv",
+}
+
+METHOD_COLORS = {
+    "spatialself": scf.METHOD_COLORS["scalecomm"],
+    "commot": scf.METHOD_COLORS["commot"],
+    "cellnest": scf.METHOD_COLORS["cellnest"],
+}
+
+INK = scf.INK
+BLACK = "#111111"
+TEXT = scf.TEXT
+MUTED = scf.MUTED
+GRID = scf.GRID
+FIG_BG = scf.FIG_BG
+PANEL_FACE = scf.PANEL_FACE
+TISSUE_BG = scf.TISSUE_BG
+SOFT_NEUTRAL = scf.NEUTRAL
+WARM_SIGNAL = scf.SOURCE_GOLD
+BAR_SIGNAL = "#D7BA7D"
+BORDER = scf.BORDER
+
+NICHE_COLORS = scf.CRC_NICHE_COLORS
+
+CELL_CONTEXT_COLOR = scf.TISSUE_BG
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--dataset-dir", default=str(DEFAULT_DATASET_DIR))
+    parser.add_argument("--phase15-dir", default=str(DEFAULT_PHASE15_DIR))
+    parser.add_argument("--output-dir", default=str(DEFAULT_OUTPUT_DIR))
+    parser.add_argument("--abundance-quantile", type=float, default=0.8)
+    parser.add_argument("--hotspot-n", type=int, default=200)
+    args = parser.parse_args()
+
+    dataset_dir = _resolve(args.dataset_dir)
+    phase15_dir = _resolve(args.phase15_dir)
+    output_dir = _resolve(args.output_dir)
+    source_dir = output_dir / "source_data"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    source_dir.mkdir(parents=True, exist_ok=True)
+    for stale in source_dir.glob("*.csv"):
+        stale.unlink()
+
+    cells = pd.read_csv(dataset_dir / "cells.csv")
+    candidates = pd.read_csv(dataset_dir / "candidate_interactions.csv")
+    lr_pairs = pd.read_csv(dataset_dir / "lr_pairs.csv")
+    receiver = pd.read_csv(phase15_dir / "method_receiver_incoming_scores.csv")
+    target = pd.read_csv(phase15_dir / "receiver_target_signature_activity.csv")
+    pred = {method: pd.read_csv(path) for method, path in PREDICTIONS.items()}
+
+    source = build_source_tables(
+        cells=cells,
+        candidates=candidates,
+        lr_pairs=lr_pairs,
+        receiver=receiver,
+        target=target,
+        predictions=pred,
+        abundance_quantile=float(args.abundance_quantile),
+        hotspot_n=int(args.hotspot_n),
+    )
+    source.update(load_crc_addition_tables())
+    for name, table in source.items():
+        table.to_csv(source_dir / f"{name}.csv", index=False)
+
+    fig = plot_cellnest_style_figure(source, hotspot_n=int(args.hotspot_n), abundance_quantile=float(args.abundance_quantile))
+    out_base = output_dir / "fig2_crc_visium_hd_tgfb1_tgfbr2_v9_response_coupling"
+    save_figure(fig, out_base)
+    plt.close(fig)
+    print(f"Wrote {out_base}.pdf/.svg/.png/.tiff")
+    print(f"Wrote source data to {source_dir}")
+
+
+def build_source_tables(
+    *,
+    cells: pd.DataFrame,
+    candidates: pd.DataFrame,
+    lr_pairs: pd.DataFrame,
+    receiver: pd.DataFrame,
+    target: pd.DataFrame,
+    predictions: dict[str, pd.DataFrame],
+    abundance_quantile: float,
+    hotspot_n: int,
+) -> dict[str, pd.DataFrame]:
+    cells_plot = cells.copy()
+    cells_plot["x_plot"] = cells_plot["x"].astype(float)
+    cells_plot["y_plot"] = -cells_plot["y"].astype(float)
+    cells_plot["target_niche"] = cells_plot["niche"].eq(TARGET_NICHE)
+
+    lr_meta = lr_pairs[["lr_id", "control_name", "true_lr", "false_positive_high_expression"]]
+    spatial_edges = (
+        candidates.drop(columns=[col for col in ["true_lr", "false_positive_high_expression"] if col in candidates.columns])
+        .merge(predictions["spatialself"], on="candidate_id", how="left", validate="one_to_one")
+        .merge(lr_meta, on="lr_id", how="left")
+        .copy()
+    )
+    stromal_receiver = spatial_edges[spatial_edges["receiver_niche"].eq(TARGET_NICHE)].copy()
+    threshold = stromal_receiver["score"].quantile(abundance_quantile)
+    top_region = stromal_receiver[stromal_receiver["score"] >= threshold].copy()
+    abundance = (
+        top_region.groupby(["lr_id", "control_name", "true_lr", "false_positive_high_expression"], as_index=False)
+        .size()
+        .rename(columns={"size": "top_edge_count"})
+        .sort_values("top_edge_count", ascending=True)
+    )
+    abundance["rank_desc"] = abundance["top_edge_count"].rank(method="min", ascending=False).astype(int)
+    abundance["highlight"] = np.where(abundance["lr_id"].eq(LR_ID), "TGFB1-TGFBR2", "other")
+    abundance["region"] = TARGET_NICHE
+    abundance["abundance_quantile"] = abundance_quantile
+
+    score_density = stromal_receiver[["lr_id", "control_name", "score", "coexpression_distance_score"]].copy()
+    score_density["group"] = np.where(score_density["lr_id"].eq(LR_ID), LR_LABEL, "all other LR/control edges")
+    prior_summary = (
+        stromal_receiver.groupby(["lr_id", "control_name", "true_lr", "false_positive_high_expression"], as_index=False)
+        .agg(
+            mean_prior=("coexpression_distance_score", "mean"),
+            max_prior=("coexpression_distance_score", "max"),
+            nonzero_prior_fraction=("coexpression_distance_score", lambda values: float((values > 0).mean())),
+        )
+        .sort_values("mean_prior", ascending=True)
+    )
+    prior_summary["highlight"] = np.where(prior_summary["lr_id"].eq(LR_ID), "TGFB1-TGFBR2", "other")
+
+    target_lr = target[target["lr_id"].eq(LR_ID)].copy()
+    target_lr["x_plot"] = target_lr["x"].astype(float)
+    target_lr["y_plot"] = -target_lr["y"].astype(float)
+    top_target_ids = set(
+        target_lr.sort_values(["target_activity", "cell_id"], ascending=[False, True])
+        .head(hotspot_n)["cell_id"]
+        .astype(str)
+    )
+    target_lr["target_hotspot"] = target_lr["cell_id"].astype(str).isin(top_target_ids)
+
+    spatial_receiver = receiver[(receiver["method"].eq("spatialself")) & (receiver["lr_id"].eq(LR_ID))].copy()
+    spatial_receiver = spatial_receiver.merge(
+        target_lr[["cell_id", "target_activity", "target_hotspot"]],
+        left_on="receiver_id",
+        right_on="cell_id",
+        how="left",
+    )
+    spatial_receiver["x_plot"] = spatial_receiver["x"].astype(float)
+    spatial_receiver["y_plot"] = -spatial_receiver["y"].astype(float)
+    ranker = spatial_receiver.sort_values(["incoming_score", "receiver_id"], ascending=[False, True]).reset_index(drop=True)
+    n_top20 = max(1, int(np.ceil(0.20 * len(ranker))))
+    ids = set(ranker.head(n_top20)["receiver_id"].astype(str))
+    threshold_maps = spatial_receiver.copy()
+    threshold_maps["threshold_label"] = "top 20%"
+    threshold_maps["top_edge_receiver"] = threshold_maps["receiver_id"].astype(str).isin(ids)
+
+    validation_rows = []
+    for method in ["spatialself", "commot", "cellnest"]:
+        sub = receiver[(receiver["method"].eq(method)) & (receiver["lr_id"].eq(LR_ID))].copy()
+        sub = sub.merge(
+            target_lr[["cell_id", "target_activity", "target_hotspot"]],
+            left_on="receiver_id",
+            right_on="cell_id",
+            how="left",
+        )
+        sub["score_percentile"] = sub["incoming_score"].rank(method="average", pct=True)
+        hotspot = sub.loc[sub["target_hotspot"].fillna(False), "score_percentile"].dropna()
+        other = sub.loc[~sub["target_hotspot"].fillna(False), "score_percentile"].dropna()
+        if len(hotspot) and len(other):
+            stat = stats.mannwhitneyu(hotspot, other, alternative="greater")
+            p_value = float(stat.pvalue)
+            auc = float(stat.statistic / (len(hotspot) * len(other)))
+        else:
+            p_value = np.nan
+            auc = np.nan
+        sub["mannwhitney_greater_p"] = p_value
+        sub["target_hotspot_auc"] = auc
+        sub["target_hotspot_n"] = int(len(hotspot))
+        sub["background_n"] = int(len(other))
+        validation_rows.append(sub)
+    response_alignment = pd.concat(validation_rows, ignore_index=True)
+
+    baseline_rows = []
+    for method in ["commot", "cellnest"]:
+        sub = receiver[(receiver["method"].eq(method)) & (receiver["lr_id"].eq(LR_ID))].copy()
+        sub["x_plot"] = sub["x"].astype(float)
+        sub["y_plot"] = -sub["y"].astype(float)
+        ids = set(sub.sort_values(["incoming_score", "receiver_id"], ascending=[False, True]).head(hotspot_n)["receiver_id"].astype(str))
+        sub["top_edge_receiver"] = sub["receiver_id"].astype(str).isin(ids)
+        sub = sub.merge(
+            target_lr[["cell_id", "target_hotspot"]],
+            left_on="receiver_id",
+            right_on="cell_id",
+            how="left",
+        )
+        baseline_rows.append(sub)
+    baseline_maps = pd.concat(baseline_rows, ignore_index=True)
+
+    commot_arrow_edges = build_method_edge_table(cells, candidates, predictions["commot"], lr_meta)
+    cellnest_heat = make_regional_heat_map(baseline_maps[baseline_maps["method"].eq("cellnest")].copy())
+
+    return {
+        "panel_a_niche_map": cells_plot,
+        "panel_b_region_lr_abundance": abundance,
+        "panel_c_spatialself_score_density": score_density,
+        "panel_d_expression_distance_prior_summary": prior_summary,
+        "panel_e_spatialself_top_edge_maps": threshold_maps,
+        "panel_f_tgfb_response_map": target_lr,
+        "panel_g_target_hotspot_alignment": response_alignment,
+        "panel_j_score_response_coupling": make_score_response_coupling(response_alignment),
+        "panel_hi_baseline_maps": baseline_maps,
+        "panel_h_commot_arrow_edges": commot_arrow_edges,
+        "panel_i_cellnest_heat_map": cellnest_heat,
+    }
+
+
+def make_score_response_coupling(alignment: pd.DataFrame, n_boot: int = 1000) -> pd.DataFrame:
+    rows = []
+    rng = np.random.default_rng(37)
+    labels = {"spatialself": "ScaleComm", "commot": "COMMOT", "cellnest": "CellNEST"}
+    for method in ["spatialself", "commot", "cellnest"]:
+        sub = alignment[alignment["method"].eq(method)].dropna(subset=["incoming_score", "target_activity"]).copy()
+        x = sub["incoming_score"].to_numpy(dtype=float)
+        y = sub["target_activity"].to_numpy(dtype=float)
+        if len(sub) < 6 or np.nanstd(x) == 0 or np.nanstd(y) == 0:
+            rho = p_value = lo = hi = np.nan
+        else:
+            rho, p_value = stats.spearmanr(x, y)
+            boots = []
+            for _ in range(n_boot):
+                idx = rng.integers(0, len(sub), size=len(sub))
+                bx = x[idx]
+                by = y[idx]
+                if np.nanstd(bx) == 0 or np.nanstd(by) == 0:
+                    continue
+                boots.append(float(stats.spearmanr(bx, by).statistic))
+            lo, hi = np.nanquantile(np.asarray(boots, dtype=float), [0.025, 0.975]) if boots else (np.nan, np.nan)
+        rows.append(
+            {
+                "method": method,
+                "method_label": labels[method],
+                "spearman_rho": float(rho),
+                "ci_low": float(lo),
+                "ci_high": float(hi),
+                "p_value": float(p_value),
+                "n_receivers": int(len(sub)),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def load_crc_addition_tables() -> dict[str, pd.DataFrame]:
+    tables: dict[str, pd.DataFrame] = {}
+    paths = {
+        "panel_j_target_gene_heatmap": ARTICLE_CRC_SOURCE / "target_gene_heatmap.csv",
+        "panel_k_sender_receiver_layers": ARTICLE_CRC_SOURCE / "sender_receiver_layers.csv",
+        "panel_k_top_edges": ARTICLE_CRC_SOURCE / "top_edges.csv",
+        "panel_l_celltype_pair_matrix": ARTICLE_EXTRA_SOURCE / "realdata_crc_tgfb1_tgfbr2_celltype_pairs.csv",
+    }
+    for key, path in paths.items():
+        tables[key] = pd.read_csv(path) if path.exists() else pd.DataFrame()
+    return tables
+
+
+def build_method_edge_table(cells: pd.DataFrame, candidates: pd.DataFrame, prediction: pd.DataFrame, lr_meta: pd.DataFrame) -> pd.DataFrame:
+    xy = cells.set_index("cell_id")[["x", "y"]]
+    edges = (
+        candidates[candidates["lr_id"].eq(LR_ID)]
+        .merge(prediction, on="candidate_id", how="left", validate="one_to_one")
+        .merge(lr_meta, on="lr_id", how="left")
+        .copy()
+    )
+    edges["sender_x"] = edges["sender_id"].map(xy["x"]).astype(float)
+    edges["sender_y"] = edges["sender_id"].map(xy["y"]).astype(float)
+    edges["receiver_x"] = edges["receiver_id"].map(xy["x"]).astype(float)
+    edges["receiver_y"] = edges["receiver_id"].map(xy["y"]).astype(float)
+    edges["sender_x_plot"] = edges["sender_x"]
+    edges["sender_y_plot"] = -edges["sender_y"]
+    edges["receiver_x_plot"] = edges["receiver_x"]
+    edges["receiver_y_plot"] = -edges["receiver_y"]
+    return edges.dropna(subset=["score", "sender_x_plot", "sender_y_plot", "receiver_x_plot", "receiver_y_plot"])
+
+
+def make_regional_heat_map(frame: pd.DataFrame, bandwidth_factor: float = 4.0) -> pd.DataFrame:
+    heat = frame.copy()
+    coords = heat[["x_plot", "y_plot"]].to_numpy(dtype=float)
+    score = heat["incoming_score"].fillna(0).to_numpy(dtype=float)
+    if len(heat) == 0 or np.nanmax(score) <= 0:
+        heat["regional_heat"] = 0.0
+        heat["heat_bandwidth"] = np.nan
+        return heat
+    tree = cKDTree(coords)
+    nn_dist, _ = tree.query(coords, k=2)
+    median_nn = float(np.nanmedian(nn_dist[:, 1]))
+    bandwidth = max(median_nn * bandwidth_factor, 1e-6)
+    radius = bandwidth * 3.0
+    regional = np.zeros(len(heat), dtype=float)
+    for idx, point in enumerate(coords):
+        neighbors = tree.query_ball_point(point, r=radius)
+        if not neighbors:
+            continue
+        neighbor_coords = coords[neighbors]
+        dist2 = np.sum((neighbor_coords - point) ** 2, axis=1)
+        weights = np.exp(-dist2 / (2.0 * bandwidth**2))
+        regional[idx] = float(np.dot(score[neighbors], weights))
+    max_heat = float(np.nanmax(regional))
+    if max_heat > 0:
+        regional = regional / max_heat
+    heat["regional_heat"] = regional
+    heat["heat_bandwidth"] = bandwidth
+    return heat
+
+
+def plot_cellnest_style_figure(source: dict[str, pd.DataFrame], *, hotspot_n: int, abundance_quantile: float) -> plt.Figure:
+    configure_matplotlib()
+    fig = plt.figure(figsize=(7.25, 8.25), constrained_layout=False)
+    gs = fig.add_gridspec(
+        4,
+        3,
+        left=0.052,
+        right=0.988,
+        bottom=0.060,
+        top=0.962,
+        wspace=0.25,
+        hspace=0.42,
+        height_ratios=[1.0, 1.03, 0.95, 0.92],
+    )
+    axes = {
+        "a": fig.add_subplot(gs[0, 0]),
+        "b": fig.add_subplot(gs[0, 1]),
+        "c": fig.add_subplot(gs[0, 2]),
+        "d": fig.add_subplot(gs[1, 0]),
+        "e": fig.add_subplot(gs[1, 1]),
+        "f": fig.add_subplot(gs[1, 2]),
+        "g": fig.add_subplot(gs[2, 0]),
+        "h": fig.add_subplot(gs[2, 1]),
+        "i": fig.add_subplot(gs[2, 2]),
+        "j": fig.add_subplot(gs[3, 0]),
+        "k": fig.add_subplot(gs[3, 1]),
+        "l": fig.add_subplot(gs[3, 2]),
+    }
+
+    plot_context_field_map(axes["a"], source["panel_a_niche_map"], source["panel_e_spatialself_top_edge_maps"])
+    plot_region_abundance(axes["b"], source["panel_b_region_lr_abundance"], abundance_quantile)
+    plot_density(axes["c"], source["panel_c_spatialself_score_density"], "score", "ScaleComm score")
+    plot_prior_summary(axes["d"], source["panel_d_expression_distance_prior_summary"])
+    plot_top_edge_series(fig, axes["e"], source["panel_e_spatialself_top_edge_maps"])
+    plot_target_response_map(axes["f"], source["panel_f_tgfb_response_map"])
+    plot_target_hotspot_alignment(axes["g"], source["panel_g_target_hotspot_alignment"], hotspot_n)
+    plot_commot_arrow_map(
+        axes["h"],
+        source["panel_hi_baseline_maps"],
+        source["panel_h_commot_arrow_edges"],
+        "COMMOT",
+    )
+    plot_cellnest_heat_map(axes["i"], source["panel_i_cellnest_heat_map"])
+    plot_score_response_coupling(axes["j"], source["panel_j_score_response_coupling"])
+    plot_sender_receiver_layers(
+        axes["k"],
+        source["panel_a_niche_map"],
+        source.get("panel_k_sender_receiver_layers", pd.DataFrame()),
+        source.get("panel_k_top_edges", pd.DataFrame()),
+    )
+    plot_receiver_celltype_roles(axes["l"], source.get("panel_k_sender_receiver_layers", pd.DataFrame()))
+
+    for key, ax in axes.items():
+        panel_label(fig, ax, key)
+    return fig
+
+
+def with_alpha(color: str, alpha: float) -> tuple[float, float, float, float]:
+    return mpl.colors.to_rgba(color, alpha)
+
+
+def panel_label(fig: plt.Figure, ax: plt.Axes, label: str, dx: float = -0.040, dy: float = 0.020) -> None:
+    scf.panel_label(fig, ax, label, dx=dx, dy=dy)
+
+
+def set_panel_title(ax: plt.Axes, title: str) -> None:
+    scf.short_panel_title(ax, title, pad=2.0)
+
+
+def plot_context_field_map(ax: plt.Axes, cells: pd.DataFrame, top_maps: pd.DataFrame) -> None:
+    label_map = {
+        "tumor_proxy": "tumor",
+        "caf_proxy": "CAF",
+        "spp1_macrophage_proxy": "SPP1 macrophage",
+        "myeloid_proxy": "myeloid",
+        "T_cell_proxy": "T cell",
+        "B_cell_proxy": "B cell",
+        "endothelial_proxy": "endothelial",
+        "epithelial_proxy": "epithelial",
+    }
+    color_map = {
+        "tumor_proxy": "#E7C6C2",
+        "caf_proxy": "#CDA77A",
+        "spp1_macrophage_proxy": scf.RESPONSE_BLUE,
+        "myeloid_proxy": "#B9C1D1",
+        "T_cell_proxy": "#8FB6D9",
+        "B_cell_proxy": "#D9A6A2",
+        "endothelial_proxy": "#93CC82",
+        "epithelial_proxy": "#D6D1C9",
+    }
+    draw_order = [
+        "epithelial_proxy",
+        "endothelial_proxy",
+        "myeloid_proxy",
+        "spp1_macrophage_proxy",
+        "T_cell_proxy",
+        "B_cell_proxy",
+        "tumor_proxy",
+        "caf_proxy",
+    ]
+    rest = cells[~cells["cell_type"].isin(draw_order)]
+    if not rest.empty:
+        ax.scatter(rest["x_plot"], rest["y_plot"], s=1.55, c=TISSUE_BG, alpha=0.25, linewidths=0, zorder=1)
+    handles = []
+    for cell_type in draw_order:
+        sub = cells[cells["cell_type"].eq(cell_type)]
+        if sub.empty:
+            continue
+        color = color_map[cell_type]
+        ax.scatter(sub["x_plot"], sub["y_plot"], s=2.25, c=color, alpha=0.70, linewidths=0, zorder=2)
+        if cell_type in {"tumor_proxy", "caf_proxy", "spp1_macrophage_proxy", "endothelial_proxy"}:
+            handles.append(mpl.lines.Line2D([], [], marker="o", ls="", color=color, markersize=3.4, label=label_map[cell_type]))
+    set_panel_title(ax, "Cell context")
+    add_spatial_style(ax, cells)
+    ax.legend(
+        handles=handles,
+        loc="lower left",
+        bbox_to_anchor=(-0.01, -0.085),
+        ncol=2,
+        fontsize=4.9,
+        handletextpad=0.25,
+        columnspacing=0.50,
+        labelcolor=TEXT,
+    )
+
+
+def draw_roi_box(ax: plt.Axes, points: pd.DataFrame, *, label: str) -> None:
+    if points.empty or not {"x_plot", "y_plot"}.issubset(points.columns):
+        return
+    if len(points) > 45:
+        xy = points[["x_plot", "y_plot"]].astype(float).to_numpy()
+        center = np.nanmedian(xy, axis=0)
+        dist = np.sum((xy - center) ** 2, axis=1)
+        points = points.iloc[np.argsort(dist)[:45]].copy()
+    x0, x1 = np.nanquantile(points["x_plot"].astype(float), [0.02, 0.98])
+    y0, y1 = np.nanquantile(points["y_plot"].astype(float), [0.02, 0.98])
+    pad_x = max((x1 - x0) * 0.16, 180.0)
+    pad_y = max((y1 - y0) * 0.16, 180.0)
+    rect = Rectangle(
+        (x0 - pad_x, y0 - pad_y),
+        (x1 - x0) + 2 * pad_x,
+        (y1 - y0) + 2 * pad_y,
+        fill=False,
+        edgecolor=BLACK,
+        linewidth=0.95,
+        zorder=8,
+    )
+    ax.add_patch(rect)
+    ax.text(
+        x0 - pad_x,
+        y1 + pad_y,
+        label,
+        ha="left",
+        va="bottom",
+        fontsize=5.4,
+        color=BLACK,
+        fontweight="bold",
+        zorder=9,
+    )
+
+
+def plot_region_abundance(ax: plt.Axes, abundance: pd.DataFrame, abundance_quantile: float) -> None:
+    table = abundance.sort_values("top_edge_count", ascending=True).copy()
+    draw_crc_barh(ax, table, "top_edge_count", "top-edge count")
+    set_panel_title(ax, "LR abundance")
+    style_bar_axis(ax)
+
+
+def plot_prior_summary(ax: plt.Axes, prior: pd.DataFrame) -> None:
+    table = prior.sort_values("mean_prior", ascending=True).copy()
+    draw_crc_barh(ax, table, "mean_prior", "mean prior")
+    set_panel_title(ax, "Prior score")
+    style_bar_axis(ax)
+
+
+def draw_crc_barh(ax: plt.Axes, table: pd.DataFrame, value_col: str, xlabel: str) -> None:
+    y = np.arange(len(table))
+    for yi, row in enumerate(table.itertuples(index=False)):
+        lr = getattr(row, "lr_id")
+        neg = bool(getattr(row, "false_positive_high_expression"))
+        value = float(getattr(row, value_col))
+        if lr == LR_ID:
+            face = with_alpha(METHOD_COLORS["spatialself"], 0.98)
+            edge = with_alpha(BLACK, 0.92)
+            lw = 0.42
+        elif neg:
+            face = with_alpha(SOFT_NEUTRAL, 0.90)
+            edge = with_alpha("#8F887F", 0.26)
+            lw = 0.28
+        else:
+            face = with_alpha(BAR_SIGNAL, 0.86)
+            edge = with_alpha("#8A6A2E", 0.22)
+            lw = 0.28
+        ax.barh(yi, value, color=face, height=0.58, edgecolor=edge, linewidth=lw)
+    xmax = float(table[value_col].max()) * 1.18 if len(table) else 1.0
+    if xmax <= 0:
+        xmax = 1.0
+    ax.set_xlim(0, xmax)
+    labels = table["control_name"].str.replace("-", "\n", regex=False)
+    ax.set_yticks(y)
+    ax.set_yticklabels(labels, fontsize=5.55, color=TEXT)
+    for tick, lr in zip(ax.get_yticklabels(), table["lr_id"]):
+        if lr == LR_ID:
+            tick.set_color(METHOD_COLORS["spatialself"])
+            tick.set_fontweight("bold")
+    for yi, (lr, value) in enumerate(zip(table["lr_id"], table[value_col])):
+        if lr == LR_ID:
+            ax.scatter(
+                float(value) + xmax * 0.035,
+                yi,
+                marker="v",
+                s=20,
+                facecolors=PANEL_FACE,
+                edgecolors=METHOD_COLORS["spatialself"],
+                linewidths=0.78,
+                zorder=5,
+                clip_on=False,
+            )
+    ax.set_xlabel(xlabel, fontsize=5.45, color=MUTED, labelpad=1.0)
+    ax.tick_params(axis="y", length=0, pad=1.0)
+    ax.tick_params(axis="x", length=2.0, pad=1.0)
+
+
+def plot_density(ax: plt.Axes, data: pd.DataFrame, column: str, title: str) -> None:
+    other = data[data["group"].ne(LR_LABEL)][column].astype(float).replace([np.inf, -np.inf], np.nan).dropna()
+    focus = data[data["group"].eq(LR_LABEL)][column].astype(float).replace([np.inf, -np.inf], np.nan).dropna()
+    if column == "coexpression_distance_score":
+        other = np.log1p(other)
+        focus = np.log1p(focus)
+        xlabel = "log1p prior"
+    else:
+        xlabel = "score"
+    hi = np.nanquantile(pd.concat([pd.Series(other), pd.Series(focus)]), 0.995)
+    bins = np.linspace(0, max(float(hi), 1e-6), 36)
+    ax.hist(other, bins=bins, density=True, color="#D9D5CE", alpha=0.80, edgecolor=with_alpha(BLACK, 0.18), linewidth=0.22, label="other")
+    ax.hist(
+        focus,
+        bins=bins,
+        density=True,
+        color=METHOD_COLORS["spatialself"],
+        alpha=0.70,
+        edgecolor=with_alpha(BLACK, 0.32),
+        linewidth=0.24,
+        label=LR_LABEL,
+    )
+    set_panel_title(ax, title)
+    ax.set_xlabel(xlabel, fontsize=5.9, color=MUTED, labelpad=1.0)
+    ax.set_ylabel("density", fontsize=5.9, color=MUTED, labelpad=1.0)
+    handles = [
+        Patch(facecolor="#D9D5CE", edgecolor=with_alpha(BLACK, 0.25), linewidth=0.35, label="other"),
+        Patch(facecolor=with_alpha(METHOD_COLORS["spatialself"], 0.70), edgecolor=with_alpha(BLACK, 0.36), linewidth=0.35, label=LR_LABEL),
+    ]
+    ax.legend(handles=handles, loc="upper left", fontsize=5.35, handlelength=0.9, labelcolor=TEXT)
+    style_quant_axis(ax)
+    ax.grid(False)
+
+
+def plot_top_edge_series(fig: plt.Figure, outer_ax: plt.Axes, maps: pd.DataFrame) -> None:
+    outer_ax.axis("off")
+    set_panel_title(outer_ax, "ScaleComm top 20%")
+    ax = outer_ax.inset_axes([0.03, 0.02, 0.94, 0.88])
+    frame = maps[maps["threshold_label"].eq("top 20%")].copy()
+    if frame.empty:
+        frame = maps.copy()
+    ax.scatter(frame["x_plot"], frame["y_plot"], s=1.35, c=TISSUE_BG, alpha=0.18, linewidths=0, zorder=1)
+    top = frame[frame["top_edge_receiver"]]
+    ax.scatter(
+        top["x_plot"],
+        top["y_plot"],
+        s=3.4,
+        c=METHOD_COLORS["spatialself"],
+        alpha=0.86,
+        edgecolors="none",
+        linewidths=0,
+        zorder=3,
+    )
+    target_top = frame[frame["target_hotspot"]]
+    ax.scatter(target_top["x_plot"], target_top["y_plot"], s=7.2, facecolors="none", edgecolors=BLACK, alpha=0.34, linewidths=0.28, zorder=4)
+    add_spatial_style(ax, frame, pad_fraction=0.004)
+    handles = [
+        mpl.lines.Line2D([], [], marker="o", ls="", color=METHOD_COLORS["spatialself"], markersize=3.4, label="top 20%"),
+        mpl.lines.Line2D([], [], marker="o", ls="", markerfacecolor="none", markeredgecolor=BLACK, color=BLACK, markeredgewidth=0.55, markersize=4.0, label="response hotspot"),
+    ]
+    ax.legend(handles=handles, loc="lower left", bbox_to_anchor=(0.00, -0.10), ncol=2, fontsize=5.0, handletextpad=0.25, columnspacing=0.55)
+
+
+def plot_target_response_map(ax: plt.Axes, target: pd.DataFrame) -> None:
+    cmap = LinearSegmentedColormap.from_list("response", ["#F7F4EC", scf.SOURCE_GOLD_SOFT, METHOD_COLORS["spatialself"]])
+    plot_target = target.sort_values(["target_activity", "cell_id"], ascending=[True, True]).copy()
+    values = plot_target["target_activity"].astype(float)
+    norm = Normalize(vmin=0, vmax=float(np.nanquantile(values, 0.985)))
+    ax.scatter(plot_target["x_plot"], plot_target["y_plot"], s=2.65, c=values, cmap=cmap, norm=norm, alpha=0.94, linewidths=0)
+    top = target[target["target_hotspot"]]
+    ax.scatter(top["x_plot"], top["y_plot"], s=7.4, facecolors="none", edgecolors=BLACK, alpha=0.42, linewidths=0.34)
+    set_panel_title(ax, "Target response")
+    add_spatial_style(ax, target)
+    cax = ax.inset_axes([0.13, -0.112, 0.54, 0.040])
+    cb = mpl.colorbar.ColorbarBase(cax, cmap=cmap, norm=norm, orientation="horizontal")
+    cb.outline.set_visible(True)
+    cb.outline.set_edgecolor(BLACK)
+    cb.outline.set_linewidth(0.45)
+    cb.set_ticks([0, norm.vmax])
+    cb.set_ticklabels(["low", "high"])
+    cb.ax.tick_params(labelsize=5.05, length=2.0, width=0.45, colors=BLACK, pad=1.0)
+
+
+def plot_target_hotspot_alignment(ax: plt.Axes, alignment: pd.DataFrame, hotspot_n: int) -> None:
+    method_order = ["spatialself", "commot", "cellnest"]
+    method_labels = ["ScaleComm", "COMMOT", "CellNEST"]
+    y = np.arange(len(method_order), dtype=float)
+    rng = np.random.default_rng(23)
+    rows = []
+    for method in method_order:
+        sub = alignment[alignment["method"].eq(method)].copy()
+        n_top = max(1, int(np.ceil(0.20 * len(sub))))
+        top = sub.sort_values(["incoming_score", "receiver_id"], ascending=[False, True]).head(n_top)
+        rest = sub.drop(index=top.index)
+        top_vals = top["target_activity"].dropna().to_numpy(dtype=float)
+        rest_vals = rest["target_activity"].dropna().to_numpy(dtype=float)
+        if len(top_vals) and len(rest_vals):
+            delta = float(np.nanmean(top_vals) - np.nanmean(rest_vals))
+            stat = stats.mannwhitneyu(top_vals, rest_vals, alternative="greater")
+            boots = []
+            for _ in range(1500):
+                h = rng.choice(top_vals, size=len(top_vals), replace=True)
+                o = rng.choice(rest_vals, size=len(rest_vals), replace=True)
+                boots.append(float(np.nanmean(h) - np.nanmean(o)))
+            boots = np.asarray(boots, dtype=float)
+            lo, hi = np.nanquantile(boots, [0.025, 0.975])
+        else:
+            delta, lo, hi, stat = np.nan, np.nan, np.nan, None
+        rows.append(
+            {
+                "method": method,
+                "delta": delta,
+                "lo": float(lo),
+                "hi": float(hi),
+                "p": float(stat.pvalue) if stat is not None else np.nan,
+                "top_mean": float(np.nanmean(top_vals)) if len(top_vals) else np.nan,
+                "rest_mean": float(np.nanmean(rest_vals)) if len(rest_vals) else np.nan,
+            }
+        )
+    summary_df = pd.DataFrame(rows).set_index("method")
+
+    ax.axvline(0.0, color=with_alpha(BLACK, 0.54), lw=0.62, ls=(0, (2.0, 2.0)), zorder=0)
+    ax.text(0.001, -0.48, "no lift", ha="left", va="center", fontsize=5.25, color=MUTED)
+
+    for pos, method in zip(y, method_order):
+        delta = float(summary_df.loc[method, "delta"])
+        lo = float(summary_df.loc[method, "lo"])
+        hi = float(summary_df.loc[method, "hi"])
+        color = METHOD_COLORS[method]
+        ax.barh(pos, delta, color=with_alpha(color, 0.76), edgecolor=with_alpha(BLACK, 0.30), linewidth=0.35, height=0.48, zorder=2)
+        ax.plot([lo, hi], [pos, pos], color=BLACK, lw=0.82, solid_capstyle="round", zorder=4)
+        ax.plot([lo, lo], [pos - 0.055, pos + 0.055], color=BLACK, lw=0.72, zorder=4)
+        ax.plot([hi, hi], [pos - 0.055, pos + 0.055], color=BLACK, lw=0.72, zorder=4)
+        ax.scatter(
+            [delta],
+            [pos],
+            s=28.0,
+            marker="o",
+            facecolors=color,
+            edgecolors=BLACK,
+            linewidths=0.42,
+            zorder=5,
+        )
+        p_value = float(summary_df.loc[method, "p"])
+        label = f"P={p_value:.1e}" if np.isfinite(p_value) and p_value < 0.01 else "n.s."
+        color = METHOD_COLORS[method] if method == "spatialself" else MUTED
+        ax.text(delta + (0.003 if delta >= 0 else -0.003), pos + 0.26, label, ha="left" if delta >= 0 else "right", va="center", fontsize=5.35, color=color)
+
+    ax.set_yticks(y)
+    ax.set_yticklabels(method_labels, fontsize=5.65, color=TEXT)
+    ax.set_xlabel("target response lift\ntop 20% - remaining", fontsize=6.0, color=BLACK, labelpad=1.0, fontweight="bold")
+    set_panel_title(ax, "Top-receiver response")
+    ax.set_xlim(-0.018, 0.034)
+    ax.set_ylim(-0.65, len(method_order) - 0.35)
+    style_reference_box_axis(ax)
+    ax.spines["left"].set_linewidth(0.68)
+    ax.spines["bottom"].set_linewidth(0.68)
+    ax.tick_params(axis="y", length=0, pad=1.6)
+    ax.tick_params(axis="x", length=2.6, pad=1.2)
+    ax.set_xticks([-0.01, 0.00, 0.02])
+
+
+def plot_baseline_map(ax: plt.Axes, maps: pd.DataFrame, method: str, label: str, edges: pd.DataFrame | None = None) -> None:
+    sub = maps[maps["method"].eq(method)].copy()
+    ax.scatter(sub["x_plot"], sub["y_plot"], s=1.25, c=TISSUE_BG, alpha=0.20, linewidths=0)
+    if edges is not None:
+        draw_cellnest_edge_lines(ax, edges)
+    top = sub[sub["top_edge_receiver"]]
+    ax.scatter(
+        top["x_plot"],
+        top["y_plot"],
+        s=5.6,
+        c=METHOD_COLORS[method],
+        alpha=0.92,
+        edgecolors=BLACK,
+        linewidths=0.085,
+        zorder=4,
+    )
+    target_top = sub[sub["target_hotspot"]]
+    ax.scatter(target_top["x_plot"], target_top["y_plot"], s=7.8, facecolors="none", edgecolors=BLACK, alpha=0.38, linewidths=0.30, zorder=5)
+    set_panel_title(ax, label)
+    add_spatial_style(ax, sub)
+
+
+def plot_cellnest_heat_map(ax: plt.Axes, heat: pd.DataFrame) -> None:
+    cmap = LinearSegmentedColormap.from_list("cellnest_heat", ["#F7F4EC", "#B8A7CA", METHOD_COLORS["cellnest"]])
+    plot_heat = heat.sort_values(["regional_heat", "receiver_id"], ascending=[True, True]).copy()
+    values = plot_heat["regional_heat"].astype(float)
+    vmax = float(np.nanquantile(values, 0.985))
+    if vmax <= 0:
+        vmax = 1.0
+    norm = Normalize(vmin=0, vmax=vmax)
+    ax.scatter(
+        plot_heat["x_plot"],
+        plot_heat["y_plot"],
+        s=2.55,
+        c=values,
+        cmap=cmap,
+        norm=norm,
+        alpha=0.94,
+        linewidths=0,
+        zorder=1,
+    )
+    top = heat[heat["target_hotspot"]]
+    ax.scatter(top["x_plot"], top["y_plot"], s=7.6, facecolors="none", edgecolors=BLACK, alpha=0.39, linewidths=0.31, zorder=3)
+    set_panel_title(ax, "CellNEST")
+    add_spatial_style(ax, heat)
+    cax = ax.inset_axes([0.13, -0.112, 0.54, 0.040])
+    cb = mpl.colorbar.ColorbarBase(cax, cmap=cmap, norm=norm, orientation="horizontal")
+    cb.outline.set_visible(True)
+    cb.outline.set_edgecolor(BLACK)
+    cb.outline.set_linewidth(0.45)
+    cb.set_ticks([0, norm.vmax])
+    cb.set_ticklabels(["low", "high"])
+    cb.ax.tick_params(labelsize=5.05, length=2.0, width=0.45, colors=BLACK, pad=1.0)
+
+
+def plot_score_response_coupling(ax: plt.Axes, coupling: pd.DataFrame) -> None:
+    if coupling.empty:
+        ax.axis("off")
+        return
+    method_order = ["cellnest", "commot", "spatialself"]
+    table = coupling.set_index("method").loc[method_order].reset_index()
+    y = np.arange(len(table), dtype=float)
+
+    ax.axvline(0.0, color=with_alpha(BLACK, 0.55), lw=0.64, ls=(0, (2.0, 2.0)), zorder=1)
+    for yi, row in zip(y, table.itertuples(index=False), strict=False):
+        method = str(row.method)
+        rho = float(row.spearman_rho)
+        lo = float(row.ci_low)
+        hi = float(row.ci_high)
+        color = METHOD_COLORS[method]
+        alpha = 0.96 if method == "spatialself" else 0.72
+        ax.plot([0, rho], [yi, yi], color=with_alpha(color, alpha), lw=3.0, solid_capstyle="round", zorder=2)
+        ax.plot([lo, hi], [yi, yi], color=BLACK, lw=0.82, solid_capstyle="round", zorder=4)
+        ax.plot([lo, lo], [yi - 0.055, yi + 0.055], color=BLACK, lw=0.72, zorder=4)
+        ax.plot([hi, hi], [yi - 0.055, yi + 0.055], color=BLACK, lw=0.72, zorder=4)
+        ax.scatter(
+            [rho],
+            [yi],
+            s=34.0 if method == "spatialself" else 27.0,
+            marker="o",
+            facecolors=color,
+            edgecolors=BLACK,
+            linewidths=0.44,
+            zorder=5,
+        )
+        label_x = max(rho, hi) + 0.006
+        ax.text(
+            label_x,
+            yi,
+            f"{rho:.2f}",
+            ha="left",
+            va="center",
+            fontsize=5.55,
+            color=color if method == "spatialself" else MUTED,
+            fontweight="bold" if method == "spatialself" else "normal",
+        )
+
+    scale_rho = float(coupling.loc[coupling["method"].eq("spatialself"), "spearman_rho"].iloc[0])
+    best_baseline = float(coupling.loc[coupling["method"].isin(["commot", "cellnest"]), "spearman_rho"].max())
+    if np.isfinite(scale_rho) and np.isfinite(best_baseline) and best_baseline > 0:
+        ax.text(
+            0.184,
+            2.42,
+            f"{scale_rho / best_baseline:.1f}x\nbest baseline",
+            ha="right",
+            va="center",
+            fontsize=5.25,
+            color=METHOD_COLORS["spatialself"],
+            fontweight="bold",
+        )
+
+    ax.set_yticks(y)
+    ax.set_yticklabels(table["method_label"].tolist(), fontsize=5.65, color=TEXT)
+    ax.set_xlabel("Spearman rho\nreceiver score vs target response", fontsize=5.8, color=BLACK, labelpad=1.0, fontweight="bold")
+    set_panel_title(ax, "Score-response coupling")
+    ax.set_xlim(-0.006, 0.192)
+    ax.set_ylim(-0.65, len(table) - 0.35)
+    ax.set_xticks([0.00, 0.05, 0.10, 0.15])
+    style_reference_box_axis(ax)
+    ax.spines["left"].set_linewidth(0.68)
+    ax.spines["bottom"].set_linewidth(0.68)
+    ax.tick_params(axis="y", length=0, pad=1.6)
+    ax.tick_params(axis="x", length=2.6, pad=1.2)
+    ax.text(
+        0.006,
+        len(table) - 0.43,
+        f"n={int(table['n_receivers'].iloc[0]):,} receivers",
+        ha="left",
+        va="center",
+        fontsize=5.1,
+        color=MUTED,
+    )
+
+
+def plot_scalecomm_response_distribution(ax: plt.Axes, alignment: pd.DataFrame) -> None:
+    sub = alignment[alignment["method"].eq("spatialself")].copy()
+    if sub.empty:
+        ax.axis("off")
+        return
+    n_top = max(1, int(np.ceil(0.20 * len(sub))))
+    top_idx = sub.sort_values(["incoming_score", "receiver_id"], ascending=[False, True]).head(n_top).index
+    sub["group"] = np.where(sub.index.isin(top_idx), "ScaleComm top 20%", "remaining")
+    groups = ["remaining", "ScaleComm top 20%"]
+    data = [sub.loc[sub["group"].eq(group), "target_activity"].dropna().to_numpy(dtype=float) for group in groups]
+    box = ax.boxplot(
+        data,
+        positions=[0, 1],
+        widths=0.46,
+        patch_artist=True,
+        showfliers=False,
+        medianprops={"color": BLACK, "linewidth": 0.70},
+        whiskerprops={"color": BLACK, "linewidth": 0.58},
+        capprops={"color": BLACK, "linewidth": 0.58},
+        boxprops={"edgecolor": BLACK, "linewidth": 0.58},
+        zorder=3,
+    )
+    fills = ["#F0ECE5", with_alpha(METHOD_COLORS["spatialself"], 0.58)]
+    for patch, color in zip(box["boxes"], fills, strict=False):
+        patch.set_facecolor(color)
+    rng = np.random.default_rng(12)
+    for idx, vals in enumerate(data):
+        if len(vals) == 0:
+            continue
+        sample = vals if len(vals) <= 240 else rng.choice(vals, size=240, replace=False)
+        x = idx + rng.uniform(-0.12, 0.12, size=len(sample))
+        ax.scatter(
+            x,
+            sample,
+            s=5.0,
+            c=METHOD_COLORS["spatialself"] if idx == 1 else TISSUE_BG,
+            alpha=0.36 if idx == 1 else 0.22,
+            linewidths=0,
+            zorder=2,
+        )
+    if all(len(vals) for vals in data):
+        stat = stats.mannwhitneyu(data[1], data[0], alternative="greater")
+        p_text = f"P={stat.pvalue:.1e}" if stat.pvalue < 0.01 else "n.s."
+        y = max(np.nanquantile(np.concatenate(data), 0.985), 0.45)
+        ax.plot([0, 1], [y, y], color=BLACK, lw=0.64, clip_on=False)
+        ax.text(0.5, y + 0.03, p_text, ha="center", va="bottom", fontsize=5.35, color=METHOD_COLORS["spatialself"])
+    ax.set_xticks([0, 1])
+    ax.set_xticklabels(["remaining", "ScaleComm\ntop 20%"], fontsize=5.35, color=TEXT)
+    ax.set_ylabel("target response", fontsize=5.85, color=BLACK, labelpad=1.3)
+    set_panel_title(ax, "ScaleComm response support")
+    style_reference_box_axis(ax)
+    ax.grid(axis="y", color=GRID, lw=0.34)
+    ax.set_ylim(-0.02, max(0.55, float(np.nanquantile(sub["target_activity"], 0.995)) + 0.08))
+
+
+def normalize_xy(df: pd.DataFrame, x_col: str, y_col: str) -> tuple[np.ndarray, np.ndarray]:
+    x = df[x_col].astype(float).to_numpy()
+    y = df[y_col].astype(float).to_numpy()
+    xmin, xmax = np.nanquantile(x, [0.01, 0.99])
+    ymin, ymax = np.nanquantile(y, [0.01, 0.99])
+    x_norm = 2 * (np.clip(x, xmin, xmax) - xmin) / max(xmax - xmin, 1e-9) - 1
+    y_norm = 2 * (np.clip(y, ymin, ymax) - ymin) / max(ymax - ymin, 1e-9) - 1
+    return x_norm, y_norm
+
+
+def plot_sender_receiver_layers(ax: plt.Axes, cells: pd.DataFrame, layers: pd.DataFrame, top_edges: pd.DataFrame) -> None:
+    if layers.empty:
+        ax.axis("off")
+        return
+    ax.set_axis_off()
+    base = cells.copy()
+    base["xn"], base["yn"] = normalize_xy(base, "x_plot", "y_plot")
+    for offset, alpha in [(0.48, 0.19), (-0.48, 0.16)]:
+        ax.scatter(base["xn"], base["yn"] * 0.34 + offset, s=1.0, c=TISSUE_BG, alpha=alpha, linewidths=0, zorder=1)
+
+    sender = layers[layers["role"].eq("sender")].copy()
+    receiver = layers[layers["role"].eq("receiver")].copy()
+    for frame in [sender, receiver]:
+        if not frame.empty:
+            frame["xn"], frame["yn"] = normalize_xy(frame, "x_plot", "y_plot")
+
+    if not top_edges.empty:
+        edge = top_edges.sort_values(["score", "candidate_id"], ascending=[False, True]).head(80).copy()
+        sender_tmp = edge[["sender_x", "sender_y"]].rename(columns={"sender_x": "x", "sender_y": "y"})
+        receiver_tmp = edge[["receiver_x", "receiver_y"]].rename(columns={"receiver_x": "x", "receiver_y": "y"})
+        edge["sx"], edge["sy"] = normalize_xy(sender_tmp, "x", "y")
+        edge["rx"], edge["ry"] = normalize_xy(receiver_tmp, "x", "y")
+        for row in edge.itertuples(index=False):
+            ax.plot(
+                [float(row.sx), float(row.rx)],
+                [float(row.sy) * 0.34 - 0.48, float(row.ry) * 0.34 + 0.48],
+                color=with_alpha(BLACK, 0.13),
+                lw=0.32,
+                zorder=2,
+            )
+
+    cell_colors = {
+        "tumor_proxy": "#E7C6C2",
+        "caf_proxy": METHOD_COLORS["spatialself"],
+        "spp1_macrophage_proxy": scf.RESPONSE_BLUE,
+        "myeloid_proxy": "#B9C1D1",
+        "T_cell_proxy": "#8FB6D9",
+        "B_cell_proxy": "#D9A6A2",
+        "endothelial_proxy": "#93CC82",
+    }
+    for frame, offset in [(sender, -0.48), (receiver, 0.48)]:
+        if frame.empty:
+            continue
+        colors = [cell_colors.get(ct, SOFT_NEUTRAL) for ct in frame["cell_type"]]
+        sizes = 7.0 + 3.2 * np.sqrt(np.clip(frame["n"].astype(float), 1, None))
+        ax.scatter(
+            frame["xn"],
+            frame["yn"] * 0.34 + offset,
+            s=sizes,
+            c=colors,
+            alpha=0.92,
+            edgecolors=BLACK,
+            linewidths=0.10,
+            zorder=5,
+        )
+    ax.text(-1.15, 0.48, "Receivers", rotation=90, ha="center", va="center", fontsize=5.7, color=BLACK, bbox=dict(facecolor="white", edgecolor=BLACK, lw=0.55, pad=1.4))
+    ax.text(-1.15, -0.48, "Senders", rotation=90, ha="center", va="center", fontsize=5.7, color=BLACK, bbox=dict(facecolor="white", edgecolor=BLACK, lw=0.55, pad=1.4))
+    ax.annotate("", xy=(-1.14, 0.22), xytext=(-1.14, -0.22), arrowprops=dict(arrowstyle="-|>", lw=0.65, color=with_alpha(BLACK, 0.35)))
+    set_panel_title(ax, "Sender-receiver cells")
+    ax.set_xlim(-1.28, 1.05)
+    ax.set_ylim(-0.88, 0.88)
+
+
+def plot_receiver_celltype_roles(ax: plt.Axes, layers: pd.DataFrame) -> None:
+    if layers.empty:
+        ax.axis("off")
+        return
+    label_map = {
+        "spp1_macrophage_proxy": "SPP1\nmacrophage",
+        "myeloid_proxy": "myeloid",
+        "T_cell_proxy": "T cell",
+        "caf_proxy": "CAF",
+        "tumor_proxy": "tumor",
+        "endothelial_proxy": "endothelial",
+        "epithelial_proxy": "epithelial",
+        "B_cell_proxy": "B cell",
+    }
+    color_map = {
+        "spp1_macrophage_proxy": scf.RESPONSE_BLUE,
+        "myeloid_proxy": "#B9C1D1",
+        "T_cell_proxy": "#8FB6D9",
+        "caf_proxy": METHOD_COLORS["spatialself"],
+        "tumor_proxy": "#E7C6C2",
+        "endothelial_proxy": "#93CC82",
+        "epithelial_proxy": "#D6D1C9",
+        "B_cell_proxy": "#D9A6A2",
+    }
+    rec = (
+        layers[layers["role"].eq("receiver")]
+        .groupby("cell_type", as_index=False)
+        .agg(n=("cell_id", "nunique"))
+        .sort_values("n", ascending=True)
+    )
+    if rec.empty:
+        ax.axis("off")
+        return
+    colors = [color_map.get(ct, SOFT_NEUTRAL) for ct in rec["cell_type"]]
+    y = np.arange(len(rec))
+    ax.barh(y, rec["n"], color=colors, edgecolor=with_alpha(BLACK, 0.35), linewidth=0.36, height=0.58)
+    ax.set_yticks(y)
+    ax.set_yticklabels([label_map.get(ct, ct.replace("_proxy", "")) for ct in rec["cell_type"]], fontsize=5.2, color=TEXT)
+    ax.set_xlabel("top-edge receiver cells", fontsize=5.7, color=BLACK, labelpad=1.0)
+    set_panel_title(ax, "Receiver cell types")
+    style_bar_axis(ax)
+    ax.grid(axis="x", color=GRID, lw=0.34)
+    ax.set_xlim(0, max(float(rec["n"].max()) * 1.18, 1.0))
+
+
+def draw_cellnest_edge_lines(ax: plt.Axes, edges: pd.DataFrame, max_edges: int = 36) -> None:
+    top = edges[edges["score"].astype(float) > 0].sort_values(["score", "candidate_id"], ascending=[False, True]).head(max_edges).copy()
+    if top.empty:
+        top = edges.sort_values(["score", "candidate_id"], ascending=[False, True]).head(max_edges).copy()
+    if top.empty:
+        return
+    vmax = max(float(top["score"].max()), 1e-9)
+    for row in top.itertuples(index=False):
+        val = float(row.score) / vmax
+        ax.plot(
+            [float(row.sender_x_plot), float(row.receiver_x_plot)],
+            [float(row.sender_y_plot), float(row.receiver_y_plot)],
+            color=BLACK,
+            lw=0.60 + 0.48 * val,
+            alpha=0.58 + 0.32 * val,
+            solid_capstyle="round",
+            zorder=6,
+        )
+
+
+def plot_commot_arrow_map(ax: plt.Axes, maps: pd.DataFrame, arrows: pd.DataFrame, label: str, max_arrows: int = 54) -> None:
+    sub = maps[maps["method"].eq("commot")].copy()
+    ax.scatter(sub["x_plot"], sub["y_plot"], s=1.22, c=TISSUE_BG, alpha=0.19, linewidths=0, zorder=1)
+    target_top = sub[sub["target_hotspot"]]
+    ax.scatter(
+        target_top["x_plot"],
+        target_top["y_plot"],
+        s=7.4,
+        facecolors="none",
+        edgecolors=BLACK,
+        alpha=0.38,
+        linewidths=0.30,
+        zorder=4,
+    )
+
+    top = arrows[arrows["score"].astype(float) > 0].sort_values(["score", "candidate_id"], ascending=[False, True]).head(max_arrows).copy()
+    if not top.empty:
+        dx = top["receiver_x_plot"].to_numpy(dtype=float) - top["sender_x_plot"].to_numpy(dtype=float)
+        dy = top["receiver_y_plot"].to_numpy(dtype=float) - top["sender_y_plot"].to_numpy(dtype=float)
+        length = np.sqrt(dx**2 + dy**2)
+        keep = length > 0
+        top = top.loc[keep].copy()
+        dx = dx[keep]
+        dy = dy[keep]
+        length = length[keep]
+        if len(top):
+            x_span = float(sub["x_plot"].max() - sub["x_plot"].min())
+            y_span = float(sub["y_plot"].max() - sub["y_plot"].min())
+            visual_length = max(x_span, y_span) * 0.052
+            ux = dx / length * visual_length
+            uy = dy / length * visual_length
+            mid_x = (top["sender_x_plot"].to_numpy(dtype=float) + top["receiver_x_plot"].to_numpy(dtype=float)) / 2
+            mid_y = (top["sender_y_plot"].to_numpy(dtype=float) + top["receiver_y_plot"].to_numpy(dtype=float)) / 2
+            scores = top["score"].to_numpy(dtype=float)
+            vmax = max(float(np.nanmax(scores)), 1e-9)
+            for x0, y0, u, v, score in zip(mid_x, mid_y, ux, uy, scores):
+                val = float(score) / vmax
+                start = (float(x0 - 0.50 * u), float(y0 - 0.50 * v))
+                end = (float(x0 + 0.50 * u), float(y0 + 0.50 * v))
+                patch = FancyArrowPatch(
+                    start,
+                    end,
+                    arrowstyle="-|>",
+                    mutation_scale=7.6,
+                    linewidth=0.52 + 0.30 * val,
+                    color=METHOD_COLORS["commot"],
+                    alpha=0.58 + 0.32 * val,
+                    shrinkA=0.0,
+                    shrinkB=0.0,
+                    zorder=3,
+                )
+                ax.add_patch(patch)
+    set_panel_title(ax, label)
+    add_spatial_style(ax, sub)
+
+
+def add_spatial_style(ax: plt.Axes, frame: pd.DataFrame, pad_fraction: float = 0.025) -> None:
+    ax.set_aspect("equal")
+    ax.set_xticks([])
+    ax.set_yticks([])
+    pad_x = (frame["x_plot"].max() - frame["x_plot"].min()) * pad_fraction
+    pad_y = (frame["y_plot"].max() - frame["y_plot"].min()) * pad_fraction
+    ax.set_xlim(frame["x_plot"].min() - pad_x, frame["x_plot"].max() + pad_x)
+    ax.set_ylim(frame["y_plot"].min() - pad_y, frame["y_plot"].max() + pad_y)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+
+def style_quant_axis(ax: plt.Axes) -> None:
+    ax.grid(axis="y", color=GRID, lw=0.30)
+    for spine in ["top", "right"]:
+        ax.spines[spine].set_visible(False)
+    ax.spines["left"].set_color(BLACK)
+    ax.spines["bottom"].set_color(BLACK)
+    ax.spines["left"].set_linewidth(0.62)
+    ax.spines["bottom"].set_linewidth(0.62)
+    ax.set_axisbelow(True)
+    ax.tick_params(axis="both", labelsize=5.55, colors=MUTED, width=0.50, length=2.0, pad=1.2)
+
+
+def style_bar_axis(ax: plt.Axes) -> None:
+    ax.grid(axis="x", color=GRID, lw=0.34)
+    ax.set_axisbelow(True)
+    for spine in ["top", "right", "left"]:
+        ax.spines[spine].set_visible(False)
+    ax.spines["bottom"].set_color(BLACK)
+    ax.spines["bottom"].set_linewidth(0.62)
+    ax.tick_params(axis="x", labelsize=5.55, colors=MUTED, width=0.50, length=2.0, pad=1.0)
+    ax.tick_params(axis="y", labelsize=5.55, colors=TEXT, width=0.0, length=0, pad=1.0)
+
+
+def style_reference_box_axis(ax: plt.Axes) -> None:
+    ax.grid(False)
+    for spine in ["top", "right"]:
+        ax.spines[spine].set_visible(False)
+    for spine in ["left", "bottom"]:
+        ax.spines[spine].set_visible(True)
+        ax.spines[spine].set_color("#111111")
+        ax.spines[spine].set_linewidth(0.82)
+    ax.tick_params(axis="both", colors="#111111", width=0.72, length=3.0, pad=1.4, labelsize=6.0)
+
+
+def configure_matplotlib() -> None:
+    scf.configure_matplotlib(font_size=6.5)
+
+
+def save_figure(fig: plt.Figure, out_base: Path) -> None:
+    fig.savefig(f"{out_base}.svg", bbox_inches="tight")
+    fig.savefig(f"{out_base}.pdf", bbox_inches="tight")
+    fig.savefig(f"{out_base}.png", dpi=900, bbox_inches="tight")
+    fig.savefig(f"{out_base}.tiff", dpi=900, bbox_inches="tight")
+
+
+def _resolve(path: str | Path) -> Path:
+    path = Path(path)
+    return path if path.is_absolute() else PROJECT_ROOT / path
+
+
+if __name__ == "__main__":
+    main()

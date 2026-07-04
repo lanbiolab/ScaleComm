@@ -1,0 +1,78 @@
+extends: configs/experiments/phase2_revised_common.yaml
+experiment_id: phase2_revised_goal4_real_background_v2
+
+objective: real-background semi-synthetic CCC benchmark with preserved ST structure and auditable truth tables
+output_dir: outputs/phase2_revised/goal4_real_background_v2
+
+semisynthetic_generator:
+  dataset_name: human_lymph_node_visium
+  injection_set: lymph_node
+  background_format: h5ad
+  h5ad_path: Human_Lymph_Node.h5ad
+  region_csv: visium_lr_benchmark/spot_region_from_c2l.csv
+  output_dir: outputs/phase2_revised/goal4_real_background_v2/datasets
+  n_spots: 1200
+  n_background_genes: 2000
+  background_gene_selection: mean_variance_random
+  required_gene_csvs: []
+  max_candidate_range_quantile: 0.08
+  negative_edge_fraction: 0.25
+  candidate_generation: sparse_sampled
+  max_candidates_per_lr: 40000
+  max_candidates_per_sender_lr: 64
+  expression_boost_strong: 8.0
+  expression_boost_weak: 3.0
+
+background_datasets:
+  lymph_node:
+    dataset_name: human_lymph_node_visium
+    injection_set: lymph_node
+    background_format: h5ad
+    h5ad_path: Human_Lymph_Node.h5ad
+    region_csv: visium_lr_benchmark/spot_region_from_c2l.csv
+  tonsil:
+    dataset_name: human_tonsil_slide_tags
+    injection_set: tonsil
+    background_format: matrix_market
+    matrix_dir: high_spatial/data
+    spatial_csv: high_spatial/data/HumanTonsil_spatial.csv
+    metadata_csv: high_spatial/data/HumanTonsil_metadata.csv
+    cell_id_col: NAME
+    x_col: X
+    y_col: Y
+    cell_type_col: cell_type
+    metadata_cell_type_col: cluster
+  melanoma:
+    dataset_name: human_melanoma_multiome
+    injection_set: melanoma
+    background_format: matrix_market
+    matrix_dir: HumanMelannomaMultiome/data
+    spatial_csv: HumanMelannomaMultiome/data/HumanMelanomaMultiome_spatial.csv
+    metadata_csv: HumanMelannomaMultiome/data/HumanMelanomaMultiome_metadata.csv
+    cell_id_col: NAME
+    x_col: X
+    y_col: Y
+    cell_type_col: cell_type
+    metadata_cell_type_col: cluster
+
+preserve_real_properties:
+  - coordinates
+  - cell_type_composition
+  - library_size
+  - sparsity
+  - local_density
+  - tissue_domain_structure
+
+truth_outputs:
+  - ground_truth_table
+  - truth_lr_pairs
+  - truth_cell_type_pairs
+  - truth_spatial_niches
+
+metrics:
+  - auroc
+  - aupr
+  - empirical_fdr
+  - spatial_localization_accuracy
+  - weak_signal_recall
+  - high_expression_false_positive_rate

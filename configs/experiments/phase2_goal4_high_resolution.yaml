@@ -1,0 +1,27 @@
+extends: configs/experiments/phase2_common.yaml
+experiment_id: p2_goal4_high_resolution
+objective: validate scalability and biology on at least one high-resolution ST dataset
+output_dir: outputs/phase2/goal4_high_resolution
+priority_datasets:
+  - xenium_or_visium_hd_subset
+  - slide_tags_tonsil
+  - melanoma_tme
+evaluation:
+  - runtime_memory
+  - region_or_module_ccc
+  - downstream_target_correlation
+  - pathway_enrichment
+  - positive_negative_controls
+status: planned
+initial_artifact:
+  dataset: human_tonsil_slide_tags
+  analysis_label: existing_prediction_stream
+  runner: scripts/phase2/run_goal4_high_resolution_tonsil_subset.py
+  output_dir: outputs/phase2/goal4_high_resolution/tonsil_existing_prediction_subset
+  limitation: existing prediction stream only; fresh Phase 2 default inference is still required
+fresh_subset_artifact:
+  dataset: human_tonsil_slide_tags
+  analysis_label: fresh_wavelet_calibrated_fdr_subset
+  runner: scripts/phase2/run_goal4_fresh_tonsil_subset.py
+  output_dir: outputs/phase2/goal4_high_resolution/tonsil_fresh_wavelet_calibrated_subset
+  limitation: subset-level initial evidence; larger tile/full data and downstream validation are still required

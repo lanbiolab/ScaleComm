@@ -1,0 +1,88 @@
+extends: configs/experiments/phase1_common.yaml
+experiment_id: exp06_permutation_fdr
+
+objective: empirical p-value and FDR control for SpatialSelf predictions
+output_dir: outputs/phase1/exp06_permutation_fdr
+
+null_models:
+  - spatial_permutation
+  - receiver_permutation
+  - lr_identity_permutation
+  - within_domain_permutation
+
+permutations:
+  n_permutations: 100
+  min_permutations_for_main_results: 1000
+  random_seed: 2025
+
+outputs:
+  - empirical_p_value
+  - bh_adjusted_fdr
+  - significant_lr_pairs
+  - significant_cell_type_pair_interactions
+  - significant_spatial_edges
+
+implementation:
+  module: src/spitialself/fdr.py
+  cli: scripts/benchmark/run_permutation_fdr.py
+  spatialself_prediction_default:
+    pseudo_label_strategy: lr_prior_lr_capped_mechanism_niche_expression_distance
+    ranking_loss_weight: 0.35
+    ranking_margin: 0.5
+    weak_positive_fraction: 0.0
+    note: aligned with Phase 1 fair SpatialSelf default used in exp03 and exp05
+  output_levels:
+    spatial_edges: "*__fdr.csv"
+    lr_pairs: "*__lr_pair_fdr.csv"
+    cell_type_pair_interactions: "*__cell_type_pair_fdr.csv"
+  group_p_value: simes
+  group_fdr: benjamini_hochberg
+  prediction_schema:
+    required_columns:
+      - candidate_id
+      - score
+    optional_columns:
+      - method
+  current_status:
+    null_models: implemented
+    candidate_edge_fdr: implemented
+    lr_pair_fdr: implemented
+    cell_type_pair_fdr: implemented
+    truth_diagnostics: implemented
+    smoke_permutations: 20
+    full_controlled_panel:
+      path: outputs/phase1/exp06_permutation_fdr/full_controlled_spatialself_panel/permutation_fdr_panel_summary.csv
+      methods:
+        - spatialself_wavelet
+        - spatialself_wavelet_edge_prior
+      replicates: 5
+      null_models:
+        - spatial_permutation
+        - receiver_permutation
+        - lr_identity_permutation
+      n_permutations: 100
+      note: Current BH-FDR procedure is conservative and yields no significant edges/groups in the full controlled panel.
+    full_slide_sparse_semisynthetic_panel:
+      path: outputs/phase1/exp06_permutation_fdr/full_slide_sparse_semisynthetic_panel/permutation_fdr_panel_summary.csv
+      method_summary: outputs/phase1/exp06_permutation_fdr/full_slide_sparse_semisynthetic_panel/permutation_fdr_panel_method_summary.csv
+      dataset: outputs/phase1/exp02_semisynthetic_real_background/full_slide_sparse_datasets
+      n_spots: 4035
+      n_candidate_interactions: 332328
+      methods:
+        - spatialself_wavelet
+        - spatialself_wavelet_edge_prior
+        - commot
+      null_models:
+        - spatial_permutation
+        - receiver_permutation
+        - lr_identity_permutation
+      n_permutations: 50
+      note: Realistic-background FDR panel completed for SpatialSelf variants and COMMOT; current score-permutation null remains conservative with no BH-significant edges/groups.
+    next_power_target_min_permutations: 1000
+
+diagnostics:
+  - null_p_value_uniformity
+  - positive_control_significance
+  - negative_control_non_significance
+  - fdr_calibration
+  - number_of_discoveries

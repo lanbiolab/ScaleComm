@@ -1,0 +1,53 @@
+extends: configs/experiments/phase1_common.yaml
+experiment_id: exp01_controlled_benchmark
+
+objective: controlled ground-truth CCC simulation benchmark
+output_dir: outputs/phase1/exp01_controlled_benchmark
+
+simulation:
+  controlled_generator:
+    n_cells: 720
+    n_background_genes: 32
+    coordinate_noise: 0.012
+    contact_range: 0.055
+    paracrine_range: 0.18
+    chemokine_range: 0.42
+    max_candidate_range: 0.45
+    negative_edge_fraction: 0.35
+    candidate_generation: full_radius
+    max_candidates_per_lr:
+    max_candidates_per_sender_lr: 48
+    output_dir: outputs/phase1/exp01_controlled_benchmark/datasets
+  mechanisms:
+    - juxtacrine_contact_dependent
+    - short_medium_paracrine
+    - longer_range_chemokine_niche
+  lr_pair_attributes:
+    - sender_cell_type
+    - receiver_cell_type
+    - spatial_range
+    - expression_strength
+    - background_expression
+    - weak_signal
+    - false_positive_high_expression
+  replicates: 5
+  held_out_test_fraction: 0.2
+
+methods:
+  include:
+    - spatialself
+    - spatialself_wavelet
+    - commot
+    - cellchat
+    - niches
+    - cellnest
+    - deeptalk
+
+metrics:
+  - auroc
+  - aupr
+  - top_k_precision
+  - recall
+  - weak_signal_recall
+  - empirical_fdr
+  - calibration_error

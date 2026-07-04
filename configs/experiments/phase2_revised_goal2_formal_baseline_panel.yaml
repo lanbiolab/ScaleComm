@@ -1,0 +1,60 @@
+extends: configs/experiments/phase2_revised_goal2_full_baseline_panel.yaml
+experiment_id: phase2_revised_goal2_formal_baseline_panel
+
+objective: adapter-aware baseline panel on formal Goal 3/4 v2 benchmark datasets
+output_dir: outputs/phase2_revised/goal2_formal_baseline_panel
+
+evidence_level: formal_benchmark_adapter_aware_not_final_tuned_baseline
+
+datasets:
+  controlled_v2_formal:
+    dataset_root: outputs/phase2_revised/goal3_simulator_v2/formal_datasets
+  real_background_v2_formal:
+    dataset_root: outputs/phase2_revised/goal4_real_background_v2/formal_datasets
+
+methods:
+  required_for_manuscript:
+    - spatialself_wavelet_edge_prior
+    - spatialself_wavelet
+    - commot
+    - cellchat
+    - spatalk
+    - cellnest
+    - deeptalk
+    - niches
+  initial_metric_panel:
+    - spatialself_wavelet_edge_prior
+    - commot
+    - cellchat
+  extended_metric_panel:
+    - spatialself_wavelet
+    - spatalk
+    - cellnest
+  status_only:
+    deeptalk: requires LR-specific predict_ccc outputs before it becomes a metric-producing baseline
+    niches: local R dependency is currently unreproducible; record blocked status explicitly
+
+spatialself:
+  epochs: 6
+  k_nn: 12
+  max_train_samples: 5000
+  pseudo_label_strategy: lr_prior_lr_capped_mechanism_niche_expression_distance
+  weak_positive_fraction: 0.0
+  ranking_loss_weight: 0.15
+  ranking_margin: 1.0
+  lr_cap_positive: 80
+  lr_cap_negative: 240
+
+commot:
+  cot_nitermax: 150
+
+adapter_light_defaults:
+  cellchat_nboot: 5
+  spatalk_per_num: 20
+  cellnest_num_epoch: 1
+  cellnest_hidden: 16
+
+claim_scope: >
+  Formal Goal 2 panel connects the formal mechanism-layered and real-background
+  v2 benchmark datasets to the adapter-aware baseline machinery. It is still
+  not the final tuned manuscript baseline comparison.

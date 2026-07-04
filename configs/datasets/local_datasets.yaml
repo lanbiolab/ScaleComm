@@ -1,0 +1,37 @@
+# Local dataset roots used by Phase 1.
+# Keep large data in place; configs point to existing artifact directories.
+
+datasets:
+  controlled_benchmark:
+    generated_root: outputs/phase1/exp01_controlled_benchmark/datasets
+    status: generator_ready
+    generator: scripts/benchmark/generate_controlled_ccc.py
+    validator: scripts/benchmark/validate_controlled_ccc.py
+
+  semisynthetic_real_background:
+    generated_root: outputs/phase1/exp02_semisynthetic_real_background/datasets
+    smoke_root: outputs/phase1/exp02_semisynthetic_real_background/smoke_datasets
+    status: generator_ready
+    generator: scripts/benchmark/generate_semisynthetic_real_background.py
+    validator: scripts/benchmark/validate_semisynthetic_real_background.py
+    current_background: human_lymph_node_visium
+
+  human_lymph_node_visium:
+    h5ad: Human_Lymph_Node.h5ad
+    artifact_root: visium_lr_benchmark
+    region_csv: visium_lr_benchmark/spot_region_from_c2l.csv
+
+  human_tonsil_slide_tags:
+    data_root: high_spatial/data
+    artifact_root: high_spatial/visium_lr_benchmark
+
+  melanoma_multiome:
+    data_root: HumanMelannomaMultiome/data
+    artifact_root: HumanMelannomaMultiome/melanoma_lr_benchmark
+
+  mouse_hippocampus:
+    data_root: mouse/data
+    artifact_root: mouse/visium_lr_benchmark
+
+  lung_cancer:
+    artifact_root: lung_cancer/visium_lr_benchmark_lung

@@ -1,0 +1,13 @@
+extends: configs/experiments/phase2_common.yaml
+experiment_id: p2_goal6_paper_figures
+objective: assemble reproducible manuscript source tables and main figures
+output_dir: outputs/phase2/goal6_paper_figures
+figure_panels:
+  - benchmark_performance
+  - weak_signal_fdr_tradeoff
+  - ablation
+  - fdr_calibration
+  - lymph_node_global_validation
+  - high_resolution_scalability
+  - biological_module_downstream_validation
+status: planned

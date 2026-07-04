@@ -1,0 +1,92 @@
+experiment_id: phase5_submission_manuscript_lock
+output_dir: outputs/phase5/manuscript_submission_lock
+
+objective: convert Phase 4 evidence-lock outputs into a submission-oriented manuscript package with stronger real-sample validation and strict claim boundaries
+
+representative_method: spatialself_wavelet_edge_prior
+
+phase5_goals:
+  - goal1_claim_boundary
+  - goal2_real_biological_validation
+  - goal3_main_figure_package
+  - goal4_results_draft
+  - goal5_methods_reproducibility
+  - goal6_real_negative_controls
+
+source_artifacts:
+  phase4:
+    evidence_index: outputs/phase4/manuscript_evidence_lock/phase4_evidence_index.csv
+    evidence_summary: outputs/phase4/manuscript_evidence_lock/phase4_evidence_index.summary.json
+    figure_source_index: outputs/phase4/manuscript_evidence_lock/phase4_figure_source_index.csv
+    figure_render_qa: outputs/phase4/manuscript_evidence_lock/phase4_figure_render_qa.csv
+    audit_summary: outputs/phase4/manuscript_evidence_lock/audit/phase4_audit_summary.csv
+    fdr_500_summary: outputs/phase4/manuscript_evidence_lock/goal3_fdr_500perm_lymph_node/goal5_formal_fdr_summary.csv
+    fdr_500_group_summary: outputs/phase4/manuscript_evidence_lock/goal3_fdr_500perm_lymph_node/goal5_formal_fdr_group_summary.csv
+    downstream_key_lymph_node_summary: outputs/phase4/manuscript_evidence_lock/goal5_downstream_key_lymph_node/phase4_downstream_key_lymph_node_summary.csv
+    ablation_summary: outputs/phase4/manuscript_evidence_lock/goal6_formal_ablation_controlled_5rep/spatialself_ablation_summary.csv
+  phase2_revised:
+    full_baseline_matched_claims_all: outputs/phase2_revised/goal1_full_baseline_matched_validation_all/goal1_baseline_matched_claims.csv
+    full_baseline_matched_method_summary_all: outputs/phase2_revised/goal1_full_baseline_matched_validation_all/goal1_baseline_matched_method_summary.csv
+    full_baseline_matched_lr_summary_all: outputs/phase2_revised/goal1_full_baseline_matched_validation_all/goal1_baseline_matched_lr_control_summary.csv
+    biological_validation_index: outputs/phase3/end_to_end/phase3_biological_validation_index.csv
+    replicated_baseline_metrics: outputs/phase2_revised/goal2_replicated_tuned_baseline_panel/goal2_replicated_tuned_metric_summary.csv
+    runtime_claims: outputs/phase2_revised/goal7_runtime_scalability/goal7_runtime_scalability_claims.csv
+  phase5:
+    claim_boundary: docs/CLAIM_BOUNDARY.md
+    results_draft: docs/manuscript/RESULTS_DRAFT.md
+    results_manuscript_draft: docs/manuscript/RESULTS_MANUSCRIPT_DRAFT.md
+    methods_reproducibility: docs/manuscript/METHODS_REPRODUCIBILITY.md
+    methods_manuscript_draft: docs/manuscript/METHODS_MANUSCRIPT_DRAFT.md
+    figure_plan: docs/manuscript/MAIN_FIGURE_PLAN.md
+    real_validation_method_summary: outputs/phase5/manuscript_submission_lock/goal2_real_validation/phase5_real_validation_method_summary.csv
+    real_validation_tissue_summary: outputs/phase5/manuscript_submission_lock/goal2_real_validation/phase5_real_validation_tissue_summary.csv
+    real_validation_lr_panel: outputs/phase5/manuscript_submission_lock/goal2_real_validation/phase5_real_validation_lr_panel.csv
+    real_validation_claims: outputs/phase5/manuscript_submission_lock/goal2_real_validation/phase5_real_validation_claims.csv
+    real_validation_manifest: outputs/phase5/manuscript_submission_lock/goal2_real_validation/phase5_real_validation_manifest.json
+    real_validation_figure_qa: outputs/phase5/manuscript_submission_lock/phase5_real_validation_figure_qa.csv
+    real_validation_figure_source_index: outputs/phase5/manuscript_submission_lock/phase5_real_validation_figure_source_index.csv
+    real_validation_figure_summary: outputs/phase5/manuscript_submission_lock/phase5_real_validation_figure_summary.json
+    lr_database_manifest: outputs/phase5/manuscript_submission_lock/goal5_methods_support/phase5_lr_database_manifest.csv
+    baseline_status_table: outputs/phase5/manuscript_submission_lock/goal5_methods_support/phase5_baseline_status_table.csv
+    methods_support_claims: outputs/phase5/manuscript_submission_lock/goal5_methods_support/phase5_methods_support_claims.csv
+    methods_support_manifest: outputs/phase5/manuscript_submission_lock/goal5_methods_support/phase5_methods_support_manifest.json
+    cross_tissue_validation_scope: outputs/phase5/manuscript_submission_lock/goal2_cross_tissue_scope/phase5_cross_tissue_validation_scope.csv
+    cross_tissue_validation_claims: outputs/phase5/manuscript_submission_lock/goal2_cross_tissue_scope/phase5_cross_tissue_validation_claims.csv
+    cross_tissue_validation_manifest: outputs/phase5/manuscript_submission_lock/goal2_cross_tissue_scope/phase5_cross_tissue_validation_manifest.json
+    main_figure_package_index: outputs/phase5/manuscript_submission_lock/main_figures/phase5_main_figure_package_index.csv
+    main_figure_source_data_index: outputs/phase5/manuscript_submission_lock/main_figures/phase5_main_figure_source_data_index.csv
+    main_figure_panel_source_index: outputs/phase5/manuscript_submission_lock/main_figures/phase5_main_figure_panel_source_index.csv
+    results_methods_qa: outputs/phase5/manuscript_submission_lock/main_figures/phase5_results_methods_qa.csv
+    submission_package_summary: outputs/phase5/manuscript_submission_lock/main_figures/phase5_submission_package_summary.json
+
+claim_policy:
+  allowed_core_claim: SpatialSelf supports a calibrated weak-signal and false-positive tradeoff in realistic benchmark settings, with graph-wavelet/LR-identity ablation, permutation/FDR, and key lymph-node downstream evidence.
+  disallowed_global_claims:
+    - SpatialSelf is best on every metric, dataset, tissue, and baseline.
+    - SpatialSelf proves weak communication superiority in all real tissues.
+    - SpatialSelf has many edge-level FDR discoveries in the current key panel.
+    - Unlabeled real ST data provide complete ground truth.
+
+required_real_validation_datasets:
+  - lymph_node
+  - tonsil
+  - melanoma
+
+required_main_figures:
+  - fig1_method_overview
+  - fig2_controlled_benchmark
+  - fig3_real_background_benchmark
+  - fig4_baseline_comparison
+  - fig5_ablation_weak_signal
+  - fig6_fdr
+  - fig7_lymph_node_validation
+  - fig8_tonsil_or_melanoma_validation
+
+retained_baselines:
+  - commot
+  - cellchat
+  - spatalk
+  - cellnest
+
+excluded_baselines:
+  - lr_coexp

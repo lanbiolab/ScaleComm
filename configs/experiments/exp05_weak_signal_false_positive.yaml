@@ -1,0 +1,48 @@
+extends: configs/experiments/phase1_common.yaml
+experiment_id: exp05_weak_signal_false_positive
+
+objective: targeted stress test for weak signals and high-expression false positives
+output_dir: outputs/phase1/exp05_weak_signal_false_positive
+
+stressors:
+  weak_signal_levels:
+    - very_weak
+    - weak
+    - moderate
+  false_positive_types:
+    - high_ligand_high_receptor_wrong_domain
+    - non_permissive_cell_type_pair
+    - spatially_shuffled_pair
+    - housekeeping_like_high_expression
+  dropout:
+    ligand_dropout: [0.0, 0.2, 0.4]
+    receptor_dropout: [0.0, 0.2, 0.4]
+
+metrics:
+  - weak_signal_recall
+  - auroc
+  - aupr
+  - fdr
+  - false_positive_suppression
+  - calibration_error
+
+implementation:
+  single_prediction_runner: scripts/benchmark/run_weak_signal_false_positive.py
+  dataset_runner: scripts/benchmark/run_weak_signal_false_positive_dataset.py
+  spatialself_default:
+    pseudo_label_strategy: lr_prior_lr_capped_mechanism_niche_expression_distance
+    ranking_loss_weight: 0.35
+    ranking_margin: 0.5
+    weak_positive_fraction: 0.0
+  current_outputs:
+    - weak_signal_false_positive_metrics.csv
+    - weak_signal_false_positive_status.csv
+    - stress_tables/*__threshold_stress.csv
+    - stress_tables/*__topk_stress.csv
+    - stress_tables/*__lr_stress.csv
+    - stress_tables/*__mechanism_stress.csv
+  current_status:
+    controlled_smoke: implemented
+    semisynthetic_smoke: implemented
+    lr_capped_pseudo_label_smoke: implemented
+    dropout_grid: pending

@@ -1,0 +1,6 @@
+ligand,receptor,target_genes,evidence_scope,note
+CCL19,CCR7,"CCR7,CXCR4,IL7R,LTB,FOS,JUNB,NFKBIA,STAT1,TNFAIP3",phase4_curated_immune_chemokine_response,CCR7-axis receiver response panel for lymphoid T-zone chemokine signaling.
+CXCL13,CXCR5,"CXCR5,MS4A1,AICDA,PRDM1,FOS,JUNB,NFKBIA,LTB,TNFAIP3",phase4_curated_immune_chemokine_response,CXCR5-axis receiver response panel for B-cell follicle and germinal-center signaling.
+SPP1,CD44,"CD44,SPP1,FOS,JUNB,NFKBIA,TNFAIP3,STAT1,CXCR4,LTB",phase4_curated_paracrine_response,SPP1-CD44 receiver response panel for inflammatory paracrine signaling.
+ACTB,EGFR,"EGFR,FOS,JUNB,NFKBIA,TNFAIP3",phase4_negative_control_response,High-expression negative-control pair; retained for specificity checks rather than positive biology.
+GAPDH,ITGB1,"ITGB1,FOS,JUNB,NFKBIA,TNFAIP3",phase4_negative_control_response,High-expression negative-control pair; retained for specificity checks rather than positive biology.

@@ -1,0 +1,103 @@
+extends: configs/experiments/phase1_common.yaml
+experiment_id: exp03_baseline_comparison
+
+objective: compare SpatialSelf with traditional and deep-learning CCC baselines
+output_dir: outputs/phase1/exp03_baseline_comparison
+
+datasets:
+  - exp01_controlled_benchmark
+  - exp02_semisynthetic_real_background
+  - human_lymph_node_visium
+
+methods:
+  implemented_candidate_level:
+    - spatialself_wavelet
+    - spatialself_wavelet_edge_prior
+    - spatialself_gat
+    - commot
+    - cellchat
+    - spatalk
+    - cellnest
+    - deeptalk
+  non_candidate_or_blocked:
+    nichenet: downstream_validation_only
+    niches: optional_blocked
+  required:
+    - spatialself_wavelet
+    - spatialself_gat
+    - commot
+    - cellchat
+    - spatalk
+    - niches
+    - cellnest
+    - deeptalk
+  optional:
+    - cellphone_db
+    - nichenet
+    - spatalk
+    - cytosignal
+    - holonet
+    - stmlnet
+
+metrics:
+  ground_truth:
+    - auroc
+    - aupr
+    - fdr
+  real_data:
+    - downstream_target_correlation
+    - region_enrichment
+    - spatial_concentration
+    - permutation_significance
+    - known_pathway_enrichment
+
+  implementation:
+  combined_runner: scripts/benchmark/run_baseline_comparison.py
+  spatialself_default:
+    pseudo_label_strategy: lr_prior_lr_capped_mechanism_niche_expression_distance
+    ranking_loss_weight: 0.35
+    ranking_margin: 0.5
+    weak_positive_fraction: 0.0
+    rationale: current strongest leakage-safe full controlled ablation
+  adapters:
+    spatialself: scripts/benchmark/run_spatialself.py
+    commot: scripts/benchmark/run_commot.py
+    cellchat: scripts/benchmark/run_cellchat.py
+    spatalk: scripts/benchmark/run_spatalk.py
+    cellnest: scripts/benchmark/run_cellnest.py
+    deeptalk_projection: scripts/benchmark/run_deeptalk.py
+    cellnest_input_preparation: scripts/benchmark/prepare_cellnest_inputs.py
+    deeptalk_input_preparation: scripts/benchmark/prepare_deeptalk_inputs.py
+  status_output:
+    - baseline_metrics.csv
+    - baseline_status.csv
+  full_evidence:
+    unified_summary: outputs/phase1/exp03_baseline_comparison/full_controlled_retained_unified/baseline_metrics_summary.csv
+    unified_status: outputs/phase1/exp03_baseline_comparison/full_controlled_retained_unified/baseline_status.csv
+    full_slide_sparse_semisynthetic_summary: outputs/phase1/exp03_baseline_comparison/full_slide_sparse_semisynthetic_retained/baseline_metrics_summary.csv
+    full_slide_sparse_semisynthetic_status: outputs/phase1/exp03_baseline_comparison/full_slide_sparse_semisynthetic_retained/baseline_status.csv
+    full_slide_sparse_semisynthetic:
+      dataset: outputs/phase1/exp02_semisynthetic_real_background/full_slide_sparse_datasets
+      n_spots: 4035
+      n_candidate_interactions: 332328
+      methods:
+        - spatialself_wavelet
+        - spatialself_wavelet_edge_prior
+        - spatialself_gat
+        - commot
+        - cellchat
+        - spatalk
+        - cellnest
+        - deeptalk
+        - nichenet
+        - niches
+      key_metrics:
+        commot_aupr: 0.480399
+        spatialself_wavelet_aupr: 0.394911
+        spatialself_wavelet_edge_prior_weak_recall: 0.039828
+        cellnest_weak_recall: 1.0
+        cellnest_empirical_fdr: 0.724005
+    caveats:
+      - CellChat/SpaTalk/CellNEST are adapter-light reproducibility checks, not final tuned baselines.
+      - DeepTalk is projection/status unless LR-specific model files are supplied.
+      - NICHES is optional_blocked because local R dependencies are not reproducible.

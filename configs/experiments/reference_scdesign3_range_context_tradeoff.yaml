@@ -1,0 +1,41 @@
+experiment_id: reference_scdesign3_range_context_tradeoff
+output_dir: outputs/reference_based_benchmark/range_context_tradeoff
+
+objective: >
+  Run a compact weak-signal versus FDR tradeoff screen for the graph-free
+  range-context SpatialSelf candidate with mechanism-aware negative guarding.
+
+datasets:
+  - dataset_id: lymph_scdesign3
+    tissue: lymph_node
+    replicate_dir: outputs/reference_based_benchmark/smoke_scdesign3/reference_lymph_node_scdesign3_replicate_00
+  - dataset_id: melanoma_scdesign3
+    tissue: melanoma
+    replicate_dir: outputs/reference_based_benchmark/smoke_scdesign3_melanoma/reference_melanoma_scdesign3_replicate_00
+
+base_model:
+  model_name: spatialself_range_context
+  epochs: 30
+  k_nn: 12
+  max_train_samples: 12000
+  pseudo_label_strategy: expression_distance
+  hard_negative_loss_weight: 0.05
+  ranking_loss_weight: 0.0
+  ranking_margin: 1.0
+
+grid:
+  mechanism_guard_loss_weight:
+    - 0.0
+    - 0.1
+    - 0.2
+  positive_quantile:
+    - 0.90
+    - 0.95
+  negative_quantile:
+    - 0.20
+    - 0.05
+
+selection_priority:
+  - empirical_fdr_at_threshold
+  - aupr
+  - top_k_precision

@@ -1,0 +1,44 @@
+extends: configs/experiments/phase2_revised_common.yaml
+experiment_id: phase2_revised_goal1_formal_baseline_matched_validation
+
+objective: formal baseline-matched injected-control biological validation on real-background v2 datasets
+output_dir: outputs/phase2_revised/goal1_formal_baseline_matched_validation
+
+datasets:
+  real_background_v2_formal_lymph_node:
+    replicate_dir: outputs/phase2_revised/goal4_real_background_v2/formal_datasets/human_lymph_node_visium_replicate_00
+    prediction_dataset: real_background_v2_formal
+  real_background_v2_formal_tonsil:
+    replicate_dir: outputs/phase2_revised/goal4_real_background_v2/formal_datasets/human_tonsil_slide_tags_replicate_00
+    prediction_dataset: real_background_v2_formal
+  real_background_v2_formal_melanoma:
+    replicate_dir: outputs/phase2_revised/goal4_real_background_v2/formal_datasets/human_melanoma_multiome_replicate_00
+    prediction_dataset: real_background_v2_formal
+
+prediction_root: outputs/phase2_revised/goal2_formal_baseline_panel
+
+method_prediction_roots:
+  spatialself_wavelet_edge_prior: outputs/phase2_revised/goal2_formal_baseline_panel
+  commot: outputs/phase2_revised/goal2_formal_baseline_panel
+  cellchat: outputs/phase2_revised/goal2_formal_baseline_panel
+  spatialself_wavelet: outputs/phase2_revised/goal2_formal_baseline_panel_extended
+  spatalk: outputs/phase2_revised/goal2_formal_baseline_panel_extended
+  cellnest: outputs/phase2_revised/goal2_formal_baseline_panel_extended
+
+methods:
+  - spatialself_wavelet_edge_prior
+  - spatialself_wavelet
+  - commot
+  - cellchat
+  - spatalk
+  - cellnest
+
+metrics:
+  - positive_control_rank
+  - negative_control_rank
+  - negative_top3_count
+  - receiver_response_proxy_spearman
+  - empirical_fdr_at_q95
+  - high_expression_false_positive_rate_at_q95
+
+claim_level: formal_injected_control_receiver_response_proxy_not_manuscript_ready

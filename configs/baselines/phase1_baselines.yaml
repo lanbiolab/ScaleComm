@@ -1,0 +1,67 @@
+# Phase 1 baseline policy.
+
+shared_policy:
+  lr_database: shared_for_all_methods
+  candidate_edges: shared_when_method_supports_edge_level_output
+  tuning:
+    report_default: true
+    report_best_validation_tuned: true
+    never_tune_on_test: true
+  unsupported_method_handling:
+    record_failure_reason: true
+    allowed_reasons:
+      - code_unavailable
+      - dependency_unreproducible
+      - input_format_incompatible
+      - output_level_incompatible
+      - runtime_or_memory_exceeded
+
+required:
+  - commot
+  - cellchat
+  - niches
+  - cellnest
+  - deeptalk
+
+implemented_candidate_level_adapters:
+  commot:
+    script: scripts/benchmark/run_commot.py
+    output_level: candidate_edge
+    status: smoke_tested
+  cellchat:
+    script: scripts/benchmark/run_cellchat.py
+    output_level: cell_type_pair_projected_to_candidate_edge
+    status: smoke_tested
+    note: Runs CellChat in cell-type/spatial mode and projects source-target LR probabilities back to benchmark candidate edges.
+  spatalk:
+    script: scripts/benchmark/run_spatalk.py
+    output_level: cell_type_pair_projected_to_candidate_edge
+    status: adapter_light_full_controlled_completed
+    note: Runs SpaTalk with known benchmark cell types and projects cell-type-pair LR scores back to candidate edges. Synthetic benchmark smoke can add minimal receptor-target pathway rows; this setting must be reported separately from native SpaTalk.
+  cellnest:
+    script: scripts/benchmark/run_cellnest.py
+    output_level: candidate_edge
+    status: smoke_tested
+    note: Runs CellNEST preprocess, short training, postprocess, and projects attention scores back to benchmark candidate edges.
+  deeptalk:
+    script: scripts/benchmark/run_deeptalk.py
+    output_level: candidate_edge_when_predict_ccc_exists
+    status: projection_smoke_tested_model_required
+    note: Projects DeepTalk predict_ccc.txt outputs through candidate_map.csv; records model_required when LR-specific trained/pretrained models are absent.
+
+non_candidate_or_blocked_methods:
+  nichenet:
+    status: downstream_validation_adapter_implemented
+    script: scripts/benchmark/extract_nichenet_targets.py
+    note: R package smoke passes. NicheNet is treated as receiver ligand-target validation support rather than a candidate-edge AUROC baseline because it ranks ligands against receiver gene sets.
+  niches:
+    status: optional_blocked
+    note: Local R install blocked by OmnipathR/xml2/rvest and BisRNA dependency issues.
+
+optional:
+  - cellphone_db
+  - nichenet
+  - spatalk
+  - cytosignal
+  - holonet
+  - stmlnet

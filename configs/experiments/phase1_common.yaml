@@ -1,0 +1,30 @@
+phase: phase1
+random_seed: 2025
+
+common_metrics:
+  ground_truth:
+    - auroc
+    - aupr
+    - top_k_precision
+    - recall
+    - weak_signal_recall
+    - empirical_fdr
+    - calibration_error
+  real_data:
+    - region_enrichment
+    - downstream_target_spearman
+    - permutation_p_value
+    - bh_fdr
+    - spatial_concentration
+  efficiency:
+    - wall_clock_time
+    - peak_cpu_memory
+    - peak_gpu_memory
+    - candidate_edges
+    - lr_pairs
+
+artifact_policy:
+  save_predictions: true
+  save_metrics_table: true
+  save_run_metadata: true
+  save_failure_reports: true

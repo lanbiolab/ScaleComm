@@ -1,0 +1,42 @@
+extends: configs/experiments/phase2_revised_goal5_formal_fdr.yaml
+experiment_id: phase2_revised_goal5_real_background_fdr_100perm
+
+objective: representative three-tissue formal FDR/calibration panel with 100 permutations
+output_dir: outputs/phase2_revised/goal5_real_background_fdr_100perm
+
+panels:
+  - dataset: real_background_v2_formal_lymph_node
+    replicate: human_lymph_node_visium_replicate_00
+    method: spatialself_wavelet
+    candidate_path: outputs/phase2_revised/goal4_real_background_v2/formal_datasets/human_lymph_node_visium_replicate_00/candidate_interactions.csv
+    prediction_path: outputs/phase2_revised/goal2_formal_baseline_panel_extended/real_background_v2_formal/spatialself_wavelet/human_lymph_node_visium_replicate_00__spatialself_wavelet_predictions.csv
+  - dataset: real_background_v2_formal_tonsil
+    replicate: human_tonsil_slide_tags_replicate_00
+    method: spatialself_wavelet
+    candidate_path: outputs/phase2_revised/goal4_real_background_v2/formal_datasets/human_tonsil_slide_tags_replicate_00/candidate_interactions.csv
+    prediction_path: outputs/phase2_revised/goal2_formal_baseline_panel_extended/real_background_v2_formal/spatialself_wavelet/human_tonsil_slide_tags_replicate_00__spatialself_wavelet_predictions.csv
+  - dataset: real_background_v2_formal_melanoma
+    replicate: human_melanoma_multiome_replicate_00
+    method: spatialself_wavelet
+    candidate_path: outputs/phase2_revised/goal4_real_background_v2/formal_datasets/human_melanoma_multiome_replicate_00/candidate_interactions.csv
+    prediction_path: outputs/phase2_revised/goal2_formal_baseline_panel_extended/real_background_v2_formal/spatialself_wavelet/human_melanoma_multiome_replicate_00__spatialself_wavelet_predictions.csv
+
+null_models:
+  - spatial_permutation
+  - receiver_permutation
+  - lr_identity_permutation
+
+fdr:
+  n_permutations: 100
+  random_seed: 2026
+  alpha: 0.05
+  score_column: score
+  direct_group_top_fraction: 0.1
+
+claim_level: representative_real_background_100perm_fdr_panel_not_final_500perm
+
+interpretation_guardrail: >
+  This panel is the Phase 2 representative fixed-null FDR panel: one lymph
+  node, one tonsil, and one melanoma real-background replicate with 100
+  permutations. It is stronger than the 50-permutation schema panel but still
+  should not be described as final 500-permutation manuscript calibration.

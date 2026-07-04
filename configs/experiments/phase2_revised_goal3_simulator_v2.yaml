@@ -1,0 +1,38 @@
+extends: configs/experiments/phase2_revised_common.yaml
+experiment_id: phase2_revised_goal3_simulator_v2
+
+objective: mechanism-layered controlled CCC simulator with auditable truth tables
+output_dir: outputs/phase2_revised/goal3_simulator_v2
+
+simulation:
+  controlled_generator:
+    n_cells: 720
+    n_background_genes: 32
+    coordinate_noise: 0.012
+    contact_range: 0.055
+    paracrine_range: 0.18
+    chemokine_range: 0.42
+    max_candidate_range: 0.45
+    negative_edge_fraction: 0.35
+    candidate_generation: sparse_sampled
+    max_candidates_per_lr: 12000
+    max_candidates_per_sender_lr: 48
+    output_dir: outputs/phase2_revised/goal3_simulator_v2/datasets
+  mechanisms:
+    - juxtacrine_contact
+    - short_medium_paracrine
+    - long_range_chemokine_niche
+  truth_outputs:
+    - ground_truth_table
+    - truth_lr_pairs
+    - truth_cell_type_pairs
+    - truth_spatial_niches
+  replicates: 3
+
+metrics:
+  - auroc
+  - aupr
+  - weak_signal_recall
+  - empirical_fdr
+  - high_expression_false_positive_rate
+  - top_k_precision

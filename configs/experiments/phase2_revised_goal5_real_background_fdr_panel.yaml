@@ -1,0 +1,42 @@
+extends: configs/experiments/phase2_revised_goal5_formal_fdr.yaml
+experiment_id: phase2_revised_goal5_real_background_fdr_panel
+
+objective: multi-dataset formal real-background FDR/calibration panel for SpatialSelf
+output_dir: outputs/phase2_revised/goal5_real_background_fdr_panel
+
+panels:
+  - dataset: real_background_v2_formal_lymph_node
+    replicate: human_lymph_node_visium_replicate_00
+    method: spatialself_wavelet
+    candidate_path: outputs/phase2_revised/goal4_real_background_v2/formal_datasets/human_lymph_node_visium_replicate_00/candidate_interactions.csv
+    prediction_path: outputs/phase2_revised/goal2_formal_baseline_panel_extended/real_background_v2_formal/spatialself_wavelet/human_lymph_node_visium_replicate_00__spatialself_wavelet_predictions.csv
+  - dataset: real_background_v2_formal_tonsil
+    replicate: human_tonsil_slide_tags_replicate_00
+    method: spatialself_wavelet
+    candidate_path: outputs/phase2_revised/goal4_real_background_v2/formal_datasets/human_tonsil_slide_tags_replicate_00/candidate_interactions.csv
+    prediction_path: outputs/phase2_revised/goal2_formal_baseline_panel_extended/real_background_v2_formal/spatialself_wavelet/human_tonsil_slide_tags_replicate_00__spatialself_wavelet_predictions.csv
+  - dataset: real_background_v2_formal_melanoma
+    replicate: human_melanoma_multiome_replicate_00
+    method: spatialself_wavelet
+    candidate_path: outputs/phase2_revised/goal4_real_background_v2/formal_datasets/human_melanoma_multiome_replicate_00/candidate_interactions.csv
+    prediction_path: outputs/phase2_revised/goal2_formal_baseline_panel_extended/real_background_v2_formal/spatialself_wavelet/human_melanoma_multiome_replicate_00__spatialself_wavelet_predictions.csv
+
+null_models:
+  - spatial_permutation
+  - receiver_permutation
+  - lr_identity_permutation
+
+fdr:
+  n_permutations: 50
+  random_seed: 2026
+  alpha: 0.05
+  score_column: score
+  direct_group_top_fraction: 0.1
+
+claim_level: formal_real_background_50perm_fdr_panel_not_manuscript_ready
+
+interpretation_guardrail: >
+  This panel expands the formal FDR schema to lymph node, tonsil, and melanoma
+  real-background benchmarks with 50 permutations. It is stronger than the
+  20-permutation schema smoke but still not a final 200-500 permutation
+  manuscript calibration panel.
