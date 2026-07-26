@@ -9,6 +9,11 @@ import torch
 from torch_geometric.data import Data
 
 from scalecomm import build_model
+from examples.tonsil_cxcl13_cxcr5.reproduce_validation import (
+    EXPECTED,
+    compute_metrics,
+    validate_metrics,
+)
 from src.spitialself.evaluation import _aupr
 
 
@@ -47,6 +52,12 @@ class ScaleCommCoreTests(unittest.TestCase):
         score = np.full(4, 0.5)
         self.assertAlmostEqual(_aupr(truth, score), 0.5)
         self.assertAlmostEqual(_aupr(truth[::-1], score), 0.5)
+
+    def test_tonsil_real_data_reproduction(self) -> None:
+        metrics = compute_metrics()
+        validate_metrics(metrics)
+        self.assertEqual(metrics["n_receivers"], EXPECTED["n_receivers"])
+        self.assertEqual(metrics["n_top_receivers"], EXPECTED["n_top_receivers"])
 
 
 if __name__ == "__main__":

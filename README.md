@@ -2,7 +2,7 @@
 
 ScaleComm is a scale-aware framework for spatial cell-cell communication inference. It models candidate sender-receiver-LR events on tissue graphs and uses LR-specific multi-scale spatial context to score putative communication events.
 
-This repository provides the core ScaleComm implementation, interactive web UI, reviewer-facing toy demo, and public smoke tests.
+This repository provides the core ScaleComm implementation, interactive web UI, reviewer examples, and public smoke tests.
 
 ## Repository Layout
 
@@ -15,6 +15,7 @@ src/spitialself/              Core ScaleComm package
 
 apps/spatialself_viewer/      Streamlit web UI for inspecting ScaleComm results
 examples/toy_scalecomm_demo.py  Data-free end-to-end smoke demo
+examples/tonsil_cxcl13_cxcr5/  Paper-linked real-data reproduction
 tests/test_core.py              Core forward/backward and metric smoke tests
 ```
 
@@ -79,6 +80,42 @@ Run the public smoke tests with:
 python -m unittest discover -s tests -v
 ```
 
+## Paper-Linked Real-Data Reproduction
+
+The versioned tonsil example reproduces the receiver-response and
+germinal-center enrichment summary for the CXCL13-CXCR5 axis in section A1.
+It uses a compact 2,500-receiver manuscript source-data table derived from the
+public SpaMosaic human tonsil RNA+ADT resource.
+
+```bash
+python examples/tonsil_cxcl13_cxcr5/reproduce_validation.py
+```
+
+Expected output:
+
+```text
+ScaleComm tonsil reproduction completed
+receivers: 2500
+top_receivers: 300
+target_response_lift: 0.806701
+spearman_incoming_target: 0.621562
+gc_fold_enrichment: 2.339520
+output: tonsil_cxcl13_cxcr5_reproduction.csv
+```
+
+The script also verifies the one-sided Mann-Whitney result and writes all
+reproduced statistics to `tonsil_cxcl13_cxcr5_reproduction.csv`. Data
+provenance and citation information are provided alongside the example.
+
+## Reproducibility
+
+The `v0.1.2` tag fixes the reviewer-facing software version. The core smoke
+demo verifies graph-wavelet encoding, optimization, candidate-event scoring
+and LR scale-profile export. The paper-linked tonsil example provides a
+versioned test dataset and executable reproduction of a reported real-data
+validation result. The commands above define the expected outputs and success
+criteria for both workflows.
+
 ## Using Your Data
 
 Prepare the following tensors using the same node order throughout:
@@ -108,3 +145,9 @@ streamlit run apps/spatialself_viewer/app.py --server.address 0.0.0.0 --server.p
 ```
 
 The UI expects result/source tables exported from a ScaleComm run. Set `SCALECOMM_VIEWER_ROOT` to the project root containing those exported tables, or adapt the dataset paths in `apps/spatialself_viewer/app.py` for your own run directory.
+
+## License
+
+ScaleComm software is released under the MIT License. See `LICENSE` for terms.
+The bundled tonsil example includes data provenance and citation information
+in `examples/tonsil_cxcl13_cxcr5/DATA_SOURCE.md`.
