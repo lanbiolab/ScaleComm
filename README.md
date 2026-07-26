@@ -2,7 +2,7 @@
 
 ScaleComm is a scale-aware framework for spatial cell-cell communication inference. It models candidate sender-receiver-LR events on tissue graphs and uses LR-specific multi-scale spatial context to score putative communication events.
 
-This public repository contains only the core ScaleComm code and the interactive web UI. Simulation benchmark contents, generated outputs, manuscript figures, raw data, and local analysis workspaces are intentionally not included.
+This repository provides the core ScaleComm implementation, interactive web UI, reviewer-facing toy demo, and public smoke tests.
 
 ## Repository Layout
 
@@ -108,14 +108,3 @@ streamlit run apps/spatialself_viewer/app.py --server.address 0.0.0.0 --server.p
 ```
 
 The UI expects result/source tables exported from a ScaleComm run. Set `SCALECOMM_VIEWER_ROOT` to the project root containing those exported tables, or adapt the dataset paths in `apps/spatialself_viewer/app.py` for your own run directory.
-
-## Not Included
-
-This repository deliberately excludes:
-
-- controlled or semi-synthetic simulation benchmark data/content
-- raw spatial transcriptomics datasets
-- generated `outputs/` folders
-- manuscript PDFs, figure exports, and reference images
-- local virtual environments
-- large binary artifacts such as `.h5ad`, `.pt`, `.npy`, `.png`, `.pdf`, and `.csv` result tables
