@@ -98,18 +98,23 @@ ScaleComm tonsil reproduction completed
 receivers: 2500
 top_receivers: 300
 target_response_lift: 0.806701
+mannwhitney_greater_p: 6.690272e-81
 spearman_incoming_target: 0.621562
+spearman_p_value: 3.403190e-267
 gc_fold_enrichment: 2.339520
+gc_fisher_greater_p: 4.035281e-69
 output: tonsil_cxcl13_cxcr5_reproduction.csv
 ```
 
-The script also verifies the one-sided Mann-Whitney result and writes all
-reproduced statistics to `tonsil_cxcl13_cxcr5_reproduction.csv`. Data
+The script separately verifies the one-sided Mann-Whitney test for response
+lift, the two-sided Spearman test for receiver-score association, and the
+one-sided Fisher exact test for GC enrichment. It writes all reproduced
+statistics to `tonsil_cxcl13_cxcr5_reproduction.csv`. Data
 provenance and citation information are provided alongside the example.
 
 ## Reproducibility
 
-The `v0.1.2` tag fixes the reviewer-facing software version. The core smoke
+The `v0.1.3` tag fixes the reviewer-facing software version. The core smoke
 demo verifies graph-wavelet encoding, optimization, candidate-event scoring
 and LR scale-profile export. The paper-linked tonsil example provides a
 versioned test dataset and executable reproduction of a reported real-data
