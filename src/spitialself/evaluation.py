@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+from sklearn.metrics import average_precision_score
 
 
 def evaluate_ground_truth_predictions(
@@ -227,16 +228,10 @@ def _aupr(y_true: np.ndarray, scores: np.ndarray) -> float:
     if n_pos == 0:
         return float("nan")
 
-    order = np.argsort(-scores)
-    sorted_true = y_true[order]
-    tp = np.cumsum(sorted_true)
-    fp = np.cumsum(1 - sorted_true)
-    recall = tp / n_pos
-    precision = tp / np.maximum(tp + fp, 1)
-
-    recall = np.r_[0.0, recall]
-    precision = np.r_[1.0, precision]
-    return float(np.trapz(precision, recall))
+    # Average precision handles tied scores as one threshold and is stable to
+    # candidate row order.  It is the standard step-wise summary of the PR
+    # curve used for the public evaluation helper.
+    return float(average_precision_score(y_true, scores))
 
 
 def _expected_calibration_error(y_true: np.ndarray, scores: np.ndarray, n_bins: int) -> float:

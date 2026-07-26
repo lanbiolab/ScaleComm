@@ -243,6 +243,8 @@ class LRSpecificWaveletContextScorer(nn.Module):
         dropout=0.2,
     ):
         super().__init__()
+        if use_distance and float(distance_scale) <= 0:
+            raise ValueError("distance_scale must be positive when distance features are enabled.")
         self.distance_scale = float(distance_scale)
         self.use_distance = bool(use_distance)
         self.edge_feature_dim = int(edge_feature_dim)
@@ -330,6 +332,8 @@ class LRScaleMixtureWaveletScorer(nn.Module):
         dropout=0.2,
     ):
         super().__init__()
+        if use_distance and float(distance_scale) <= 0:
+            raise ValueError("distance_scale must be positive when distance features are enabled.")
         self.distance_scale = float(distance_scale)
         self.use_distance = bool(use_distance)
         self.edge_feature_dim = int(edge_feature_dim)

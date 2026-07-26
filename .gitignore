@@ -11,6 +11,9 @@ __pycache__/
 .venv/
 venv/
 .SpatialVenv/
+*.egg-info/
+build/
+dist/
 
 outputs/
 data/

@@ -49,7 +49,7 @@ class FormalFDRPanelConfig:
     alpha: float = 0.05
     direct_group_top_fraction: float = 0.1
     panel_metadata: dict = field(default_factory=dict)
-    claim_level: str = "formal_fdr_panel_not_manuscript_ready"
+    claim_level: str = "post_hoc_permutation_fdr"
 
 
 def run_formal_fdr_panel(
@@ -204,13 +204,13 @@ def permutation_fdr(
     null_model: str,
     config: PermutationFDRConfig | None = None,
 ) -> pd.DataFrame:
-    """Compute candidate-level empirical p-values under a score-permutation null.
+    """Compute candidate-level empirical p-values by stratified score reassignment.
 
-    This is a method-agnostic post-processing null: it does not retrain or rerun
-    the predictor. Instead, it breaks a chosen biological/spatial association by
-    shuffling observed scores within conservative strata. That gives us a common
-    FDR schema for SpatialSelf and baselines; model-rerun nulls can be added
-    later with the same output columns.
+    This method-agnostic post-processing null does not retrain or rerun the
+    predictor. It randomly reassigns observed scores to candidate events within
+    strata defined by ``null_model``. Names such as ``spatial_permutation``
+    describe which candidate-event association is broken; coordinates and input
+    expression matrices themselves are not permuted.
     """
 
     config = config or PermutationFDRConfig()
