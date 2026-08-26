@@ -1,0 +1,9 @@
+analysis: CRC Visium HD real-data analyses
+source_dataset: Visium HD colorectal cancer
+analyses:
+  - receiver-level threshold-free localization
+  - response-signature audit
+  - capture-depth sensitivity summaries
+source_data: reproducibility/artifacts/real_data_threshold_free/source_data
+figure_reconstruction: reproducibility/artifacts/real_data_threshold_free/rebuild_figures.py
+configuration: Exact reported configurations, source-table provenance and receiver counts are retained in the source-data manifests.

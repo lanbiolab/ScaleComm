@@ -1,0 +1,40 @@
+workflow: spamosaic_tonsil_a1_end_to_end
+method_name: spatialself_wavelet_scale
+user_facing_method_name: ScaleComm
+input:
+  source_h5ad: tonsil_A1_rna_adt.h5ad
+  source_record: https://doi.org/10.5281/zenodo.18946723
+  section: A1
+preparation:
+  n_cells: 2500
+  selection_seed: 17
+  target_profile: rich
+  max_neighbors_per_sender: 30
+  max_candidates_per_lr: 90000
+graph:
+  knn: 12
+  diffusion_steps: [1, 2, 4, 8]
+training:
+  seed: 7
+  device: cuda
+  epochs: 200
+  learning_rate: 0.001
+  hidden_dim: 64
+  lr_embedding_dim: 24
+  positive_quantile: 0.90
+  negative_quantile: 0.20
+  pseudo_label_strategy: mechanism_niche_expression_distance
+  train_sampling_strategy: balanced_per_lr
+  max_train_samples: 12000
+  hard_negative_loss_weight: 0.05
+  scale_target_loss_weight: 1.10
+  scale_diversity_loss_weight: 0.45
+  scale_responsibility_loss_weight: 0.35
+  scale_responsibility_margin: 0.35
+  scale_responsibility_edges: 2048
+  lr_scale_target_strategy: ranklocal
+  mechanism_guard_loss_weight: 0.03
+outputs:
+  prepared_dir: work/prepared/spamosaic_tonsil_A1_rich_targets_subset
+  run_dir: work/results/a1_rich_scalecomm_e200
+  top_receivers: 300

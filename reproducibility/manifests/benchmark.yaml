@@ -1,0 +1,8 @@
+analysis: mechanism-aware semi-synthetic benchmark
+released_analyses:
+  - fixed-budget benchmark metrics across six settings
+  - objective and matched-attention control source data
+  - method-level summaries and figure reconstruction scripts
+resources:
+  fixed_budget: reproducibility/artifacts/fixed_budget_benchmark
+  objective_attention_controls: reproducibility/artifacts/objective_attention_controls

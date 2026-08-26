@@ -1,0 +1,21 @@
+analysis: SpaMosaic tonsil A1 CXCL13-CXCR5
+reproduction_level: end_to_end
+source_data:
+  record: https://doi.org/10.5281/zenodo.18946723
+  required_h5ad: tonsil_A1_rna_adt.h5ad
+workflow: reproducibility/tonsil_a1/run_end_to_end.sh
+fixed_configuration: reproducibility/tonsil_a1/config.yaml
+expected_preparation:
+  n_cells: 2500
+  n_lr_pairs: 7
+  n_candidate_events: 525000
+reference_checksums:
+  cells.csv: 77c23294b5d9afe065099c22b1bd358a64762e74161f338fc770c103e8df277c
+  expression.csv: 607885d98d31ad3d5c36f35fd48afe9e37d317bfd69d1c84cd5808dea845291e
+  lr_pairs.csv: 6fcda1f656f34db0592b32a398d61db1cb33b6dc1408e9f83c500e1f8e09e801
+  candidate_interactions.csv: 230477d55b93abaa453adb8e4af2159d36f83d1ef081ea787182f36f66e9110c
+  target_signatures.csv: 4c7f145bbd03396fba3769fbf0cca785ea0fdce1e6bd9a301ebb05c39a62570c
+reference_model_outputs:
+  predictions.csv: 5f5d7e9507e80e0e219381b33290fcdf127be40a5aa8df65876dd426b1d228cc
+  lr_scale_distribution.csv: b35f01a97af8cb44d253732540448e8a0ad1dce6abc2a4a645b7a5ea7e37c6e5
+note: Prediction hashes are a reference for the recorded environment. Cross-platform training may differ slightly.

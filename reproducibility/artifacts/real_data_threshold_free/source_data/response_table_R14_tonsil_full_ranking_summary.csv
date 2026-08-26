@@ -1,0 +1,3 @@
+case,dataset_group,lr_pair,role,n_receivers,n_positive,positive_prevalence,roc_auc,pr_aupr,pr_lift,score_aggregation,target_aggregation,positive_fraction
+Tonsil A1,Tonsil,CXCL13-CXCR5,primary,2500,862,0.3448,0.8129672596029905,0.6824858683798816,1.979367367691072,receiver mean,annotated label,annotated
+Tonsil D1,Tonsil,CXCL13-CXCR5,primary,2500,906,0.3624,0.8218394863741237,0.7164590162250611,1.976984040356129,receiver mean,annotated label,annotated

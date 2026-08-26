@@ -1,0 +1,21 @@
+dataset,section,lr_pair,target_rule,n_receivers,n_positive,positive_prevalence,roc_auc,pr_aupr,pr_lift
+CosMx NSCLC,9000-cell subset,CCL5-CCR5,top 20% target proxy; LR genes excluded,5523,1105,0.2000724244070251,0.6375094481850268,0.2684200214167005,1.3416142789904406
+CosMx NSCLC,9000-cell subset,SPP1-CD44,top 20% target proxy; LR genes excluded,7247,1450,0.2000827928798123,0.521149702878421,0.2136293890479247,1.0677049534002143
+CosMx NSCLC,9000-cell subset,TGFB1-TGFBR2,top 20% target proxy; LR genes excluded,7040,1408,0.2,0.5463903758151473,0.2362681785154753,1.1813408925773767
+CosMx NSCLC,9000-cell subset,VEGFA-KDR,top 20% target proxy; LR genes excluded,7121,1425,0.2001123437719421,0.6217667060910704,0.3070697470301483,1.5344867849836394
+CosMx NSCLC,9000-cell subset,CXCL12-CXCR4,top 20% target proxy; LR genes excluded,6239,1248,0.2000320564192979,0.5626794897482135,0.2211768062874679,1.1057068064323017
+DSS MERFISH,mouse_colon_ibd_merfish_DSS21_rep1_082421_D21_m2_1_slice_2,Cxcl10-Cxcr3,top 20% downstream proxy; LR genes excluded,13,3,0.2307692307692307,0.6,0.55,2.3833333333333333
+DSS MERFISH,mouse_colon_ibd_merfish_DSS21_rep1_082421_D21_m2_1_slice_2,Cxcl12-Cxcr4,top 20% downstream proxy; LR genes excluded,18,4,0.2222222222222222,0.375,0.2138109031491384,0.9621490641711228
+DSS MERFISH,mouse_colon_ibd_merfish_DSS21_rep2_082421_D21_m2_1_slice_1,Cxcl10-Cxcr3,top 20% downstream proxy; LR genes excluded,26,6,0.2307692307692307,0.5833333333333334,0.4981481481481481,2.1586419753086417
+DSS MERFISH,mouse_colon_ibd_merfish_DSS21_rep2_082421_D21_m2_1_slice_1,Cxcl12-Cxcr4,top 20% downstream proxy; LR genes excluded,38,8,0.2105263157894736,0.6416666666666666,0.346265756302521,1.6447623424369748
+DSS MERFISH,mouse_colon_ibd_merfish_DSS3_rep1_092421_D3_m3_1_slice_4,Cxcl10-Cxcr3,top 20% downstream proxy; LR genes excluded,11,3,0.2727272727272727,0.6666666666666666,0.5916666666666666,2.1694444444444443
+DSS MERFISH,mouse_colon_ibd_merfish_DSS3_rep1_092421_D3_m3_1_slice_4,Cxcl12-Cxcr4,top 20% downstream proxy; LR genes excluded,36,8,0.2222222222222222,0.4866071428571428,0.322643786189612,1.451897037853254
+DSS MERFISH,mouse_colon_ibd_merfish_DSS3_rep2_092421_D3_m1_1_slice_1,Cxcl12-Cxcr4,top 20% downstream proxy; LR genes excluded,27,6,0.2222222222222222,0.4841269841269841,0.2523148148148147,1.1354166666666663
+DSS MERFISH,mouse_colon_ibd_merfish_DSS9_rep1_100221_D9_m5_2_slice_3,Cxcl10-Cxcr3,top 20% downstream proxy; LR genes excluded,27,6,0.2222222222222222,0.4365079365079365,0.2168306638894874,0.9757379875026936
+DSS MERFISH,mouse_colon_ibd_merfish_DSS9_rep1_100221_D9_m5_2_slice_3,Cxcl12-Cxcr4,top 20% downstream proxy; LR genes excluded,17,4,0.2352941176470588,0.3461538461538461,0.2184065934065934,0.928228021978022
+DSS MERFISH,mouse_colon_ibd_merfish_DSS9_rep2_100221_D9_m3_2_slice_2,Cxcl10-Cxcr3,top 20% downstream proxy; LR genes excluded,24,5,0.2083333333333333,0.4210526315789474,0.2068115942028985,0.992695652173913
+DSS MERFISH,mouse_colon_ibd_merfish_DSS9_rep2_100221_D9_m3_2_slice_2,Cxcl12-Cxcr4,top 20% downstream proxy; LR genes excluded,21,5,0.238095238095238,0.7,0.4625,1.9425
+DSS MERFISH,mouse_colon_ibd_merfish_Healthy_D0_rep1_082421_D0_m6_1_slice_3,Cxcl10-Cxcr3,top 20% downstream proxy; LR genes excluded,10,2,0.2,0.6875,0.4166666666666666,2.083333333333333
+DSS MERFISH,mouse_colon_ibd_merfish_Healthy_D0_rep1_082421_D0_m6_1_slice_3,Cxcl12-Cxcr4,top 20% downstream proxy; LR genes excluded,63,13,0.2063492063492063,0.3323076923076923,0.1618610627937804,0.7844036120006285
+DSS MERFISH,mouse_colon_ibd_merfish_Healthy_D0_rep2_082421_D0_m7_1_slice_1,Cxcl10-Cxcr3,top 20% downstream proxy; LR genes excluded,15,3,0.2,0.4722222222222221,0.2621082621082621,1.3105413105413104
+DSS MERFISH,mouse_colon_ibd_merfish_Healthy_D0_rep2_082421_D0_m7_1_slice_1,Cxcl12-Cxcr4,top 20% downstream proxy; LR genes excluded,38,8,0.2105263157894736,0.4916666666666667,0.3489701084459149,1.657608015118096

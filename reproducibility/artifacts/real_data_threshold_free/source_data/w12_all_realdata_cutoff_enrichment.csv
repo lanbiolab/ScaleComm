@@ -1,0 +1,85 @@
+dataset,section,lr_pair,positive_label,top_fraction,n_top_receivers,positive_n_top,positive_fraction_top,positive_fraction_background,fold_enrichment,fisher_odds_ratio,fisher_greater_p
+SPAMOSAIC tonsil A1,A1,CXCL13-CXCR5,GC receiver,0.05,125,102,0.816,0.3448,2.3665893271461718,9.423913043478262,1.3615178643131925e-28
+SPAMOSAIC tonsil A1,A1,CXCL13-CXCR5,GC receiver,0.1,250,206,0.824,0.3448,2.3897911832946637,11.376247228381375,5.991231866064358e-61
+SPAMOSAIC tonsil A1,A1,CXCL13-CXCR5,GC receiver,0.15,375,296,0.7893333333333333,0.3448,2.2892498066511986,10.320347094869616,1.4471781250000303e-82
+SPAMOSAIC tonsil A1,A1,CXCL13-CXCR5,GC receiver,0.2,500,367,0.734,0.3448,2.12877030162413,8.389686337054759,1.4883070062679411e-89
+SPAMOSAIC tonsil A1,A1,CXCL13-CXCR5,GC receiver,0.3,750,492,0.656,0.3448,1.9025522041763343,7.112507856693903,9.972305130812615e-100
+SPAMOSAIC tonsil A1,A1,CXCL13-CXCR5,GC receiver,0.4,1000,594,0.594,0.3448,1.722737819025522,6.725681935151827,2.2952433648509387e-102
+SPAMOSAIC tonsil A1,A1,CXCL13-CXCR5,GC receiver,0.5,1250,684,0.5472,0.3448,1.5870069605568446,7.278040258863699,2.3205094143025495e-105
+SPAMOSAIC tonsil D1,D1,CXCL13-CXCR5,GC receiver,0.05,125,109,0.872,0.3624,2.4061810154525385,13.488237139272272,1.1140228761868656e-33
+SPAMOSAIC tonsil D1,D1,CXCL13-CXCR5,GC receiver,0.1,250,201,0.804,0.3624,2.218543046357616,8.989578810247503,1.705378736826327e-51
+SPAMOSAIC tonsil D1,D1,CXCL13-CXCR5,GC receiver,0.15,375,300,0.8,0.3624,2.207505518763797,10.026402640264026,1.154717589217368e-79
+SPAMOSAIC tonsil D1,D1,CXCL13-CXCR5,GC receiver,0.2,500,392,0.784,0.3624,2.163355408388521,10.493442859201615,1.4334949278613785e-104
+SPAMOSAIC tonsil D1,D1,CXCL13-CXCR5,GC receiver,0.3,750,536,0.7146666666666667,0.3624,1.972038263428992,9.341752967921192,3.837810199299565e-126
+SPAMOSAIC tonsil D1,D1,CXCL13-CXCR5,GC receiver,0.4,1000,657,0.657,0.3624,1.8129139072847682,9.623414942569111,6.861481746856507e-141
+SPAMOSAIC tonsil D1,D1,CXCL13-CXCR5,GC receiver,0.5,1250,739,0.5912,0.3624,1.6313465783664458,9.378546234341494,2.703473589155831e-132
+CRC Visium HD,CRC,TGFB1-TGFBR2,top TGF-response receiver,0.05,214,4,0.018691588785046728,0.03761682242990654,0.49689440993788814,0.47424931756141947,0.9650036450712323
+CRC Visium HD,CRC,TGFB1-TGFBR2,top TGF-response receiver,0.1,428,10,0.02336448598130841,0.03761682242990654,0.6211180124223602,0.586362052029532,0.968379784979506
+CRC Visium HD,CRC,TGFB1-TGFBR2,top TGF-response receiver,0.15,642,17,0.0264797507788162,0.03761682242990654,0.7039337474120083,0.6599777777777778,0.9623710580611606
+CRC Visium HD,CRC,TGFB1-TGFBR2,top TGF-response receiver,0.2,856,26,0.030373831775700934,0.03761682242990654,0.8074534161490683,0.7631771530566711,0.9135775703746795
+CRC Visium HD,CRC,TGFB1-TGFBR2,top TGF-response receiver,0.3,1284,53,0.04127725856697819,0.03761682242990654,1.0973084886128364,1.151307278033517,0.2293046212745472
+CRC Visium HD,CRC,TGFB1-TGFBR2,top TGF-response receiver,0.4,1712,94,0.054906542056074766,0.03761682242990654,1.4596273291925466,2.168643802003579,1.2183055271821613e-06
+CRC Visium HD,CRC,TGFB1-TGFBR2,top TGF-response receiver,0.5,2140,124,0.05794392523364486,0.03761682242990654,1.5403726708074534,3.495978120978121,7.075433398899635e-13
+CosMx NSCLC,9000-cell subset,CXCL12-CXCR4,top 20% receiver target-response proxy,0.05,312,57,0.18269230769230768,0.20003205641929797,0.9133151503944772,,
+CosMx NSCLC,9000-cell subset,CXCL12-CXCR4,top 20% receiver target-response proxy,0.1,624,126,0.20192307692307693,0.20003205641929797,1.0094535872781065,,
+CosMx NSCLC,9000-cell subset,CXCL12-CXCR4,top 20% receiver target-response proxy,0.15,936,204,0.21794871794871795,0.20003205641929797,1.0895689513477975,,
+CosMx NSCLC,9000-cell subset,CXCL12-CXCR4,top 20% receiver target-response proxy,0.2,1248,286,0.22916666666666666,0.20003205641929797,1.1456497061965811,,
+CosMx NSCLC,9000-cell subset,CXCL12-CXCR4,top 20% receiver target-response proxy,0.3,1872,449,0.23985042735042736,0.20003205641929797,1.1990599489097085,,
+CosMx NSCLC,9000-cell subset,CXCL12-CXCR4,top 20% receiver target-response proxy,0.4,2496,594,0.23798076923076922,0.20003205641929797,1.189713156434911,,
+CosMx NSCLC,9000-cell subset,CXCL12-CXCR4,top 20% receiver target-response proxy,0.5,3120,733,0.23493589743589743,0.20003205641929797,1.1744912372616698,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS21_rep1_082421_D21_m2_1_slice_2,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.05,1,0,0.0,0.3333333333333333,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS21_rep1_082421_D21_m2_1_slice_2,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.1,1,0,0.0,0.3333333333333333,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS21_rep1_082421_D21_m2_1_slice_2,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.15,1,0,0.0,0.3333333333333333,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS21_rep1_082421_D21_m2_1_slice_2,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.2,2,0,0.0,0.3333333333333333,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS21_rep1_082421_D21_m2_1_slice_2,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.3,2,0,0.0,0.3333333333333333,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS21_rep1_082421_D21_m2_1_slice_2,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.4,3,1,0.3333333333333333,0.3333333333333333,1.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS21_rep1_082421_D21_m2_1_slice_2,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.5,3,1,0.3333333333333333,0.3333333333333333,1.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS21_rep2_082421_D21_m2_1_slice_1,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.05,1,0,0.0,0.25,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS21_rep2_082421_D21_m2_1_slice_1,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.1,2,0,0.0,0.25,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS21_rep2_082421_D21_m2_1_slice_1,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.15,3,1,0.3333333333333333,0.25,1.3333333333333333,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS21_rep2_082421_D21_m2_1_slice_1,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.2,4,1,0.25,0.25,1.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS21_rep2_082421_D21_m2_1_slice_1,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.3,5,1,0.2,0.25,0.8,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS21_rep2_082421_D21_m2_1_slice_1,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.4,7,1,0.14285714285714285,0.25,0.5714285714285714,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS21_rep2_082421_D21_m2_1_slice_1,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.5,8,2,0.25,0.25,1.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS3_rep1_092421_D3_m3_1_slice_4,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.05,1,0,0.0,0.25,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS3_rep1_092421_D3_m3_1_slice_4,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.1,2,0,0.0,0.25,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS3_rep1_092421_D3_m3_1_slice_4,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.15,2,0,0.0,0.25,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS3_rep1_092421_D3_m3_1_slice_4,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.2,3,0,0.0,0.25,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS3_rep1_092421_D3_m3_1_slice_4,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.3,4,0,0.0,0.25,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS3_rep1_092421_D3_m3_1_slice_4,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.4,5,0,0.0,0.25,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS3_rep1_092421_D3_m3_1_slice_4,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.5,6,1,0.16666666666666666,0.25,0.6666666666666666,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS3_rep2_092421_D3_m1_1_slice_1,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.05,1,0,0.0,0.2727272727272727,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS3_rep2_092421_D3_m1_1_slice_1,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.1,2,0,0.0,0.2727272727272727,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS3_rep2_092421_D3_m1_1_slice_1,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.15,2,0,0.0,0.2727272727272727,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS3_rep2_092421_D3_m1_1_slice_1,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.2,3,0,0.0,0.2727272727272727,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS3_rep2_092421_D3_m1_1_slice_1,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.3,4,0,0.0,0.2727272727272727,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS3_rep2_092421_D3_m1_1_slice_1,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.4,5,0,0.0,0.2727272727272727,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS3_rep2_092421_D3_m1_1_slice_1,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.5,6,0,0.0,0.2727272727272727,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS9_rep1_100221_D9_m5_2_slice_3,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.05,1,1,1.0,0.25,4.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS9_rep1_100221_D9_m5_2_slice_3,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.1,2,1,0.5,0.25,2.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS9_rep1_100221_D9_m5_2_slice_3,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.15,2,1,0.5,0.25,2.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS9_rep1_100221_D9_m5_2_slice_3,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.2,3,2,0.6666666666666666,0.25,2.6666666666666665,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS9_rep1_100221_D9_m5_2_slice_3,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.3,4,2,0.5,0.25,2.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS9_rep1_100221_D9_m5_2_slice_3,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.4,5,2,0.4,0.25,1.6,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS9_rep1_100221_D9_m5_2_slice_3,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.5,6,2,0.3333333333333333,0.25,1.3333333333333333,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS9_rep2_100221_D9_m3_2_slice_2,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.05,2,1,0.5,0.2,2.5,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS9_rep2_100221_D9_m3_2_slice_2,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.1,3,1,0.3333333333333333,0.2,1.6666666666666665,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS9_rep2_100221_D9_m3_2_slice_2,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.15,4,1,0.25,0.2,1.25,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS9_rep2_100221_D9_m3_2_slice_2,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.2,5,1,0.2,0.2,1.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS9_rep2_100221_D9_m3_2_slice_2,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.3,8,2,0.25,0.2,1.25,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS9_rep2_100221_D9_m3_2_slice_2,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.4,10,2,0.2,0.2,1.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_DSS9_rep2_100221_D9_m3_2_slice_2,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.5,13,3,0.23076923076923078,0.2,1.1538461538461537,,
+DSS MERFISH,mouse_colon_ibd_merfish_Healthy_D0_rep1_082421_D0_m6_1_slice_3,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.05,1,0,0.0,0.21052631578947367,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_Healthy_D0_rep1_082421_D0_m6_1_slice_3,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.1,2,0,0.0,0.21052631578947367,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_Healthy_D0_rep1_082421_D0_m6_1_slice_3,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.15,3,0,0.0,0.21052631578947367,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_Healthy_D0_rep1_082421_D0_m6_1_slice_3,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.2,4,1,0.25,0.21052631578947367,1.1875,,
+DSS MERFISH,mouse_colon_ibd_merfish_Healthy_D0_rep1_082421_D0_m6_1_slice_3,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.3,6,1,0.16666666666666666,0.21052631578947367,0.7916666666666666,,
+DSS MERFISH,mouse_colon_ibd_merfish_Healthy_D0_rep1_082421_D0_m6_1_slice_3,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.4,8,2,0.25,0.21052631578947367,1.1875,,
+DSS MERFISH,mouse_colon_ibd_merfish_Healthy_D0_rep1_082421_D0_m6_1_slice_3,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.5,10,2,0.2,0.21052631578947367,0.9500000000000001,,
+DSS MERFISH,mouse_colon_ibd_merfish_Healthy_D0_rep2_082421_D0_m7_1_slice_1,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.05,2,0,0.0,0.2,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_Healthy_D0_rep2_082421_D0_m7_1_slice_1,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.1,3,0,0.0,0.2,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_Healthy_D0_rep2_082421_D0_m7_1_slice_1,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.15,4,0,0.0,0.2,0.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_Healthy_D0_rep2_082421_D0_m7_1_slice_1,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.2,5,1,0.2,0.2,1.0,,
+DSS MERFISH,mouse_colon_ibd_merfish_Healthy_D0_rep2_082421_D0_m7_1_slice_1,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.3,8,2,0.25,0.2,1.25,,
+DSS MERFISH,mouse_colon_ibd_merfish_Healthy_D0_rep2_082421_D0_m7_1_slice_1,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.4,10,3,0.3,0.2,1.4999999999999998,,
+DSS MERFISH,mouse_colon_ibd_merfish_Healthy_D0_rep2_082421_D0_m7_1_slice_1,Ccl2-Ccr2,top 20% receiver inflammatory-response proxy,0.5,13,4,0.3076923076923077,0.2,1.5384615384615385,,

@@ -1,6 +1,6 @@
 # ScaleComm
 
-ScaleComm is a scale-aware framework for spatial cell-cell communication inference. It models candidate sender-receiver-LR events on tissue graphs and uses LR-specific multi-scale spatial context to score putative communication events.
+ScaleComm is a scale-aware framework for spatial cell-cell communication inference. It models candidate sender-receiver-LR events on tissue graphs and uses an LR-specific multi-scale graph-diffusion representation to score putative communication events.
 
 This repository provides the core ScaleComm implementation, interactive web UI, reviewer examples, and public smoke tests.
 
@@ -16,6 +16,7 @@ src/spitialself/              Core ScaleComm package
 apps/spatialself_viewer/      Streamlit web UI for inspecting ScaleComm results
 examples/toy_scalecomm_demo.py  Data-free end-to-end smoke demo
 examples/tonsil_cxcl13_cxcr5/  Paper-linked real-data reproduction
+reproducibility/               Paper-linked workflow, manifests and figure resources
 tests/test_core.py              Core forward/backward and metric smoke tests
 ```
 
@@ -46,7 +47,7 @@ matching your CUDA/runtime environment.
 ## Minimal Demo
 
 The bundled demo generates a small tissue graph in memory, performs a short
-optimization run with the official graph-wavelet scale-mixture model, scores
+optimization run with the official multi-scale diffusion scale-mixture model, scores
 candidate sender-receiver-LR events and exports the learned scale profiles. It
 does not contain or reproduce the manuscript simulation benchmark.
 
@@ -82,10 +83,11 @@ python -m unittest discover -s tests -v
 
 ## Paper-Linked Real-Data Reproduction
 
-The versioned tonsil example reproduces the receiver-response and
+The compact versioned tonsil example below reproduces the receiver-response and
 germinal-center enrichment summary for the CXCL13-CXCR5 axis in section A1.
-It uses a compact 2,500-receiver manuscript source-data table derived from the
-public SpaMosaic human tonsil RNA+ADT resource.
+It starts from a 2,500-receiver manuscript source-data table derived from the
+public SpaMosaic human tonsil RNA+ADT resource. It validates an exported result
+table; it does not retrain ScaleComm.
 
 ```bash
 python examples/tonsil_cxcl13_cxcr5/reproduce_validation.py
@@ -112,16 +114,48 @@ one-sided Fisher exact test for GC enrichment. It writes all reproduced
 statistics to `tonsil_cxcl13_cxcr5_reproduction.csv`. Data
 provenance and citation information are provided alongside the example.
 
-## Reproducibility
+### End-to-end Tonsil A1 Workflow
 
-The `v0.1.3` tag fixes the reviewer-facing software version. The core smoke
-demo verifies graph-wavelet encoding, optimization, candidate-event scoring
-and LR scale-profile export. The paper-linked tonsil example provides a
-versioned test dataset and executable reproduction of a reported real-data
-validation result. The commands above define the expected outputs and success
-criteria for both workflows.
+For an end-to-end paper-linked workflow from the public SpaMosaic A1 h5ad
+object through input preparation, candidate construction, weak supervision,
+de novo training, scoring and validation export, see:
+
+```text
+reproducibility/tonsil_a1/README.md
+```
+
+The detailed step-by-step tutorial is at
+`docs/END_TO_END_TONSIL_A1_TUTORIAL.md`.
+
+The workflow is launched as:
+
+```bash
+bash reproducibility/tonsil_a1/run_end_to_end.sh /path/to/tonsil_A1_rna_adt.h5ad cuda
+```
+
+It uses the fixed A1 study configuration in
+`reproducibility/tonsil_a1/config.yaml`, including a 12-NN graph, preparation
+seed 17, training seed 7 and 200 epochs. These settings describe the
+paper-linked A1 workflow and are not universal defaults for every dataset.
+
+## Reproducibility Resources
+
+The `v0.1.3` tag fixes the reviewer-facing software version. The release
+provides the paper-linked SpaMosaic tonsil A1 workflow, dataset-specific
+configuration manifests, released source-data tables and figure-reconstruction
+scripts for the reported analyses. Commands and expected outputs are listed in
+[reproducibility/README.md](reproducibility/README.md). Run the guard for
+the compact tonsil validation table with:
+
+```bash
+python reproducibility/verify_reported_statistics.py
+```
 
 ## Using Your Data
+
+For a complete worked example that converts a public h5ad object into these
+inputs, use `reproducibility/tonsil_a1/README.md`. The tensor description below
+is the lower-level API for users who already have prepared inputs.
 
 Prepare the following tensors using the same node order throughout:
 
@@ -142,7 +176,28 @@ profiles. Large datasets should score candidate events in batches.
 
 ## Web UI
 
-The Streamlit viewer displays exported ScaleComm result tables on an interactive spatial canvas with LR selection, cell-type filtering, communication edges, sender/receiver overlays, and hover/click inspection.
+The paper-linked static Explorer is self-contained: it embeds the exported
+SpaMosaic tonsil A1 tables and does not depend on hard-coded local result-table
+paths. Launch it from the repository root:
+
+```bash
+python3 -m http.server 8502 --bind 0.0.0.0 --directory apps/scalecomm_explorer
+```
+
+Then open:
+
+```text
+http://localhost:8502/scalecomm_explorer_tonsil_cxcl13_cxcr5.html
+```
+
+Its controls, data provenance, screenshots and interpretation boundary are
+documented in `apps/scalecomm_explorer/README.md`.
+
+The separate Streamlit viewer is a developer-facing browser for arbitrary
+exported ScaleComm result tables. It displays LR selection, cell-type
+filtering, communication edges, sender/receiver overlays and hover/click
+inspection. Its input-table convention is documented in
+`apps/spatialself_viewer/README.md`.
 
 ```bash
 pip install -r apps/spatialself_viewer/requirements.txt
@@ -150,22 +205,6 @@ streamlit run apps/spatialself_viewer/app.py --server.address 0.0.0.0 --server.p
 ```
 
 The UI expects result/source tables exported from a ScaleComm run. Set `SCALECOMM_VIEWER_ROOT` to the project root containing those exported tables, or adapt the dataset paths in `apps/spatialself_viewer/app.py` for your own run directory.
-
-### Paper-linked Tonsil Explorer
-
-`apps/scalecomm_explorer/` contains a standalone, read-only browser for the
-SpaMosaic tonsil A1 `CXCL13-CXCR5` case study. Its embedded payload is matched
-to the manuscript-linked tonsil result tables and supports LR selection,
-cell-type-pair filtering, event inspection, and PNG/CSV export without Python
-dependencies or model retraining.
-
-```bash
-python3 -m http.server 8502 --bind 0.0.0.0 --directory apps/scalecomm_explorer
-```
-
-Open `http://localhost:8502/scalecomm_explorer_tonsil_cxcl13_cxcr5.html`.
-The Explorer README documents payload provenance, interpretation boundaries,
-and screenshots of the available interactions.
 
 ## License
 

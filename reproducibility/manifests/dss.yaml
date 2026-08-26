@@ -1,0 +1,8 @@
+analysis: MERFISH DSS real-data analyses
+source_dataset: MERFISH mouse DSS colitis
+analyses:
+  - stage-matched receiver-level threshold-free localization
+  - replicate-level scale-profile summaries
+  - capture-depth sensitivity summaries
+source_data: reproducibility/artifacts/real_data_threshold_free/source_data
+figure_reconstruction: reproducibility/artifacts/real_data_threshold_free/rebuild_figures.py

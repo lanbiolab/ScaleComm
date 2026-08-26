@@ -1,0 +1,8 @@
+analysis: CosMx NSCLC real-data analyses
+source_dataset: CosMx NSCLC
+analyses:
+  - receiver-level threshold-free localization
+  - context and coordinate permutation controls
+  - cross-dataset profile comparisons
+source_data: reproducibility/artifacts/real_data_threshold_free/source_data
+figure_reconstruction: reproducibility/artifacts/real_data_threshold_free/rebuild_figures.py

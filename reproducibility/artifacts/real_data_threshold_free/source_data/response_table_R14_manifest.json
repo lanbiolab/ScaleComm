@@ -1,0 +1,13 @@
+{
+  "table_id": "R14",
+  "description": "Complete receiver-ranking ROC and precision-recall audit for the reviewer-requested tonsil CXCL13-CXCR5 analyses.",
+  "sections": [
+    "A1",
+    "D1"
+  ],
+  "receiver_universe": "All 2,500 receiver units per section; no top-receiver cutoff.",
+  "source_files": [
+    "response_table_R14_tonsil_full_ranking_curves.csv",
+    "response_table_R14_tonsil_full_ranking_summary.csv"
+  ]
+}
