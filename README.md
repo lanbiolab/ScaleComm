@@ -151,6 +151,22 @@ streamlit run apps/spatialself_viewer/app.py --server.address 0.0.0.0 --server.p
 
 The UI expects result/source tables exported from a ScaleComm run. Set `SCALECOMM_VIEWER_ROOT` to the project root containing those exported tables, or adapt the dataset paths in `apps/spatialself_viewer/app.py` for your own run directory.
 
+### Paper-linked Tonsil Explorer
+
+`apps/scalecomm_explorer/` contains a standalone, read-only browser for the
+SpaMosaic tonsil A1 `CXCL13-CXCR5` case study. Its embedded payload is matched
+to the manuscript-linked tonsil result tables and supports LR selection,
+cell-type-pair filtering, event inspection, and PNG/CSV export without Python
+dependencies or model retraining.
+
+```bash
+python3 -m http.server 8502 --bind 0.0.0.0 --directory apps/scalecomm_explorer
+```
+
+Open `http://localhost:8502/scalecomm_explorer_tonsil_cxcl13_cxcr5.html`.
+The Explorer README documents payload provenance, interpretation boundaries,
+and screenshots of the available interactions.
+
 ## License
 
 ScaleComm software is released under the MIT License. See `LICENSE` for terms.
