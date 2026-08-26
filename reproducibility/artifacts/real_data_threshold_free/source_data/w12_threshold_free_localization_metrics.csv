@@ -1,0 +1,4 @@
+dataset,section,lr_pair,positive_label,positive_definition,n_receivers,n_positive_receivers,positive_fraction,roc_auc,pr_aupr
+SPAMOSAIC tonsil A1,A1,CXCL13-CXCR5,GC receiver,niche=germinal_center_proxy,2500,862,0.3448,0.8129672596029905,0.6824858683798816
+SPAMOSAIC tonsil D1,D1,CXCL13-CXCR5,GC receiver,niche=germinal_center_proxy,2500,906,0.3624,0.8218394863741237,0.7164590162250611
+CRC Visium HD,CRC,TGFB1-TGFBR2,top TGF-response receiver,top_200_receiver_target_activity,4280,161,0.03761682242990654,0.6136801279934375,0.04564801880221407

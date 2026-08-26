@@ -1,0 +1,20 @@
+analysis: MERFISH DSS stage-matched receiver-level localization and replicate summaries
+reproduction_level: released-source-data figure reconstruction
+source_dataset: MERFISH mouse DSS colitis
+analysis_subset:
+  stages: [DSS9, DSS21]
+  focal_lr_axes: [Cxcl10-Cxcr3, Cxcl12-Cxcr4]
+  replicates_per_stage: 2
+  positive_proxy: stage-matched receiver response signatures
+reported_run_configuration:
+  graph_knn: 12
+  model_seed: 7
+  score_aggregation: case-specific receiver aggregation recorded in source data
+  reconstruction_seed: not applicable; deterministic source-table rendering
+released_outputs:
+  source_data: reproducibility/artifacts/real_data_threshold_free/source_data
+  summary_table: reproducibility/artifacts/real_data_threshold_free/source_data/w12_comment9_threshold_free_summary.csv
+  figure_reconstruction: reproducibility/artifacts/real_data_threshold_free/rebuild_figures.py
+  figure_outputs: R13a_ROC, R13b_PrecisionRecall, R13c_AUC
+reconstruction_command: python rebuild_figures.py
+scope_note: This manifest supports regeneration of released figures from source tables and does not provide a public raw-count-to-model-result workflow for DSS.

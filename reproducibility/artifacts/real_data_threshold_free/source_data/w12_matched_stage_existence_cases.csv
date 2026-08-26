@@ -1,0 +1,5 @@
+dataset,stage,lr_pair,replicate,score_aggregation,target_aggregation,positive_fraction,n_receivers,n_positive,roc_auc,pr_aupr,pr_lift,selection_note
+DSS MERFISH,DSS9,Cxcl10-Cxcr3,replicate 1,mean,rankmean,0.30,27,9,0.759259,0.726879,2.180636,exploratory maximum within the original-case sensitivity screen
+DSS MERFISH,DSS9,Cxcl10-Cxcr3,replicate 2,max,rankmean,0.10,24,3,0.714286,0.714286,5.714286,exploratory maximum within the original-case sensitivity screen
+DSS MERFISH,DSS21,Cxcl12-Cxcr4,replicate 1,sum,zmean,0.10,18,2,0.812500,0.325000,2.925000,exploratory maximum within the original-case sensitivity screen
+DSS MERFISH,DSS21,Cxcl12-Cxcr4,replicate 2,max,zmean,0.10,38,4,0.691176,0.417803,3.969129,exploratory maximum within the original-case sensitivity screen

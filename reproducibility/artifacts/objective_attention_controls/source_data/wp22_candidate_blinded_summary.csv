@@ -1,0 +1,5 @@
+condition_code,condition_label,mean_aupr,sd_aupr
+A,"Wavelet BCE, expression + distance",0.12691880593861266,0.061026642174288354
+B,ScaleComm truth-blinded full,0.1835318829594579,0.027601686451592628
+C,Matched GAT truth-blinded BCE,0.13099061706282164,0.026666957644293453
+D,Matched GAT truth-blinded BCE + non-scale auxiliary,0.18813591985251715,0.01614106397220716

@@ -1,9 +1,9 @@
 {
   "dataset": "SPAMOSAIC tonsil A1",
   "default_lr": "CXCL13-CXCR5",
-  "source_input": "outputs/phase7/functional_cross_platform_validation/goal5_cross_platform_real_data/standardized_inputs/spamosaic_tonsil_A1_rich_targets_subset",
-  "source_prediction": "outputs/current_spamosaic_tonsil_scalecomm_rerun/a1_rich_spatialself_wavelet_scale_e200/spamosaic_tonsil_A1_rich_targets_subset__spatialself_wavelet_scale_predictions.csv",
-  "named_html": "outputs/current_web_ui/scalecomm_explorer_tonsil_cxcl13_cxcr5.html",
-  "product_html": "outputs/current_web_ui/spatialself_explorer_product_ui.html",
-  "paper_html": "outputs/current_web_ui/spatialself_explorer_paper_screenshot.html"
+  "asset": "apps/scalecomm_explorer/scalecomm_explorer_tonsil_cxcl13_cxcr5.html",
+  "payload": "embedded read-only released result tables",
+  "provenance": "SpaMosaic tonsil A1 CXCL13-CXCR5 paper-linked ScaleComm result export",
+  "documentation": "apps/scalecomm_explorer/README.md",
+  "screenshots": "apps/scalecomm_explorer/screenshots/"
 }

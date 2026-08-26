@@ -20,22 +20,13 @@ For a remote workstation, replace `localhost` with the workstation address. The 
 
 ## Provenance
 
-The browser payload uses the current ScaleComm A1 rerun with internal implementation identifier `spatialself_wavelet_scale_e200`. It is matched to the source tables used by revised manuscript Figure 6:
-
-```text
-Manuscript figure:
-  manuscript/manuscript_revised_marked/figures/fig6_tonsil_spamosaic.pdf
-
-Matched source tables:
-  outputs/manuscript_final_figures/fig5_spamosaic_tonsil/source_data/
-
-Prediction input:
-  outputs/current_spamosaic_tonsil_scalecomm_rerun/
-  a1_rich_spatialself_wavelet_scale_e200/
-  spamosaic_tonsil_A1_rich_targets_subset__spatialself_wavelet_scale_predictions.csv
-```
-
-The accompanying JSON manifest records the dataset, default LR axis, prediction input, and browser asset path. The browser is a visualization layer over exported ScaleComm result tables; it neither retrains the model nor changes any scores.
+The browser payload is a released, embedded A1 result export for the current
+ScaleComm analysis. Its internal file identifier contains
+`spatialself_wavelet_scale`; this is a legacy API identifier, whereas the
+manuscript describes the representation as multi-scale graph diffusion. The
+accompanying JSON manifest records the dataset, default LR axis, browser asset
+and documentation paths. The browser is a visualization layer over exported
+result tables; it neither retrains the model nor changes any scores.
 
 ## Browser functions
 

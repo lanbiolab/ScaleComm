@@ -1,0 +1,2 @@
+method,benchmark_settings,score_min,score_max,unique_score_count,selection_rule,interpretation,source
+SpaTalk,6,0.0,0.0,1,candidate-ID deterministic tie-breaking at exact top 5%,original benchmark summary; no informative continuous candidate ranking,/home/xd/y/SpitialSelf/outputs/reference_based_benchmark/scdesign3_mechanism_200lr/main_figure_v15/source_data/method_metrics.csv

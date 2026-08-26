@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+from sklearn.metrics import average_precision_score
 
 
 def evaluate_ground_truth_predictions(
@@ -18,7 +19,9 @@ def evaluate_ground_truth_predictions(
 
     Expected prediction schema: `candidate_id`, `method`, `score`.
     Expected truth schema: `candidate_id`, `ground_truth`, `weak_signal`,
-    `false_positive_high_expression`, `mechanism`.
+    `false_positive_high_expression`, `mechanism`. When available, the
+    evaluator also reports selected-call rates for wrong-range and wrong-niche
+    negative controls; those columns are never required for real-data use.
     """
 
     required_prediction = {"candidate_id", score_column}
@@ -50,6 +53,16 @@ def evaluate_ground_truth_predictions(
 
     weak_mask = merged["weak_signal"].astype(bool).to_numpy()
     false_positive_mask = merged["false_positive_high_expression"].astype(bool).to_numpy()
+    wrong_range_mask = (
+        merged["wrong_range_false_positive"].fillna(False).astype(bool).to_numpy()
+        if "wrong_range_false_positive" in merged
+        else np.zeros(len(merged), dtype=bool)
+    )
+    wrong_niche_mask = (
+        (~merged["niche_rule_satisfied"].fillna(True).astype(bool).to_numpy()) & (y_true == 0)
+        if "niche_rule_satisfied" in merged
+        else np.zeros(len(merged), dtype=bool)
+    )
 
     metrics = {
         "n_candidates": int(len(merged)),
@@ -73,10 +86,25 @@ def evaluate_ground_truth_predictions(
         "false_positive_high_expression_rate_at_threshold": _safe_divide(
             int((predicted_positive & false_positive_mask).sum()), int(false_positive_mask.sum())
         ),
+        "wrong_range_false_positive_rate_at_threshold": _safe_divide(
+            int((predicted_positive & wrong_range_mask).sum()), int(wrong_range_mask.sum())
+        ),
+        "wrong_niche_false_positive_rate_at_threshold": _safe_divide(
+            int((predicted_positive & wrong_niche_mask).sum()), int(wrong_niche_mask.sum())
+        ),
         "calibration_error_10bin": _expected_calibration_error(y_true, scores, n_bins=10),
         "threshold_quantile": float(threshold_quantile),
         "threshold_score": float(np.quantile(scores, threshold_quantile)),
     }
+    true_positive = int((predicted_positive & (y_true == 1)).sum())
+    false_positive = int((predicted_positive & (y_true == 0)).sum())
+    false_negative = int((~predicted_positive & (y_true == 1)).sum())
+    true_negative = int((~predicted_positive & (y_true == 0)).sum())
+    precision = _safe_divide(true_positive, true_positive + false_positive)
+    recall = _safe_divide(true_positive, true_positive + false_negative)
+    metrics["precision_at_threshold"] = precision
+    metrics["f1_at_threshold"] = _safe_divide(2.0 * precision * recall, precision + recall)
+    metrics["specificity_at_threshold"] = _safe_divide(true_negative, true_negative + false_positive)
 
     for mechanism, subset in merged.groupby("mechanism"):
         mechanism_true = subset["ground_truth"].astype(int).to_numpy()
@@ -166,6 +194,8 @@ def summarize_real_data_predictions(
         "weak_signal_recall_at_threshold": float("nan"),
         "empirical_fdr_at_threshold": float("nan"),
         "false_positive_high_expression_rate_at_threshold": float("nan"),
+        "wrong_range_false_positive_rate_at_threshold": float("nan"),
+        "wrong_niche_false_positive_rate_at_threshold": float("nan"),
         "calibration_error_10bin": float("nan"),
         "threshold_quantile": float("nan"),
         "threshold_score": float("nan"),
@@ -227,16 +257,9 @@ def _aupr(y_true: np.ndarray, scores: np.ndarray) -> float:
     if n_pos == 0:
         return float("nan")
 
-    order = np.argsort(-scores)
-    sorted_true = y_true[order]
-    tp = np.cumsum(sorted_true)
-    fp = np.cumsum(1 - sorted_true)
-    recall = tp / n_pos
-    precision = tp / np.maximum(tp + fp, 1)
-
-    recall = np.r_[0.0, recall]
-    precision = np.r_[1.0, precision]
-    return float(np.trapz(precision, recall))
+    # Average precision evaluates tied values as one score threshold, avoiding
+    # arbitrary candidate-row ordering in coarse or projected baseline scores.
+    return float(average_precision_score(y_true, scores))
 
 
 def _expected_calibration_error(y_true: np.ndarray, scores: np.ndarray, n_bins: int) -> float:

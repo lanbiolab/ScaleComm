@@ -1,0 +1,9 @@
+{
+  "threshold_free_metrics": "ROC-AUC and average precision classify receivers in the anatomically annotated positive niche from mean incoming ScaleComm score.",
+  "cutoff_sensitivity": "GC/target-niche enrichment measured at pre-specified top 5%, 10%, 15%, 20%, 30%, 40%, and 50% receiver cutoffs.",
+  "tonsil_sections": [
+    "A1",
+    "D1"
+  ],
+  "crc_axis": "TGFB1-TGFBR2"
+}

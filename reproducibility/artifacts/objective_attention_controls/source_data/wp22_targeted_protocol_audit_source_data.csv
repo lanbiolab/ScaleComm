@@ -1,0 +1,37 @@
+panel,condition,metric,value
+a,"seed 1
+distance",BCE,0.4910247020238385
+a,"seed 7
+distance",BCE,0.5089139700523649
+a,"seed 19
+distance",BCE,0.4921069281828493
+a,"seed 1
+rankdist",BCE,0.5072488384885598
+a,"seed 7
+rankdist",BCE,0.4938529902942727
+a,"seed 19
+rankdist",BCE,0.4876434412883271
+a,"seed 1
+distance",BCE + scale target,0.504172776938543
+a,"seed 7
+distance",BCE + scale target,0.513434133055667
+a,"seed 19
+distance",BCE + scale target,0.5193218512001068
+a,"seed 1
+rankdist",BCE + scale target,0.4905143075898479
+a,"seed 7
+rankdist",BCE + scale target,0.5188068921648438
+a,"seed 19
+rankdist",BCE + scale target,0.5108604448844976
+b,"Wavelet
+BCE",mean AUPR,0.5184062800686333
+b,"GAT
+BCE",mean AUPR,0.4231429215564853
+b,"GAT +
+auxiliary",mean AUPR,0.5861618425198099
+b,"Full
+ScaleComm",mean AUPR,0.6231488782582275
+c,"Expression--
+distance",mean AUPR,0.1269188059386127
+c,"Truth-blinded
+ScaleComm",mean AUPR,0.1901924142215615

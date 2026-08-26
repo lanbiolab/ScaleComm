@@ -1,0 +1,20 @@
+analysis: CosMx NSCLC receiver-level localization and spatial-context controls
+reproduction_level: released-source-data figure reconstruction
+source_dataset: CosMx NSCLC
+analysis_subset:
+  section: 9000-cell subset
+  focal_lr_axes: [CCL5-CCR5, SPP1-CD44, TGFB1-TGFBR2, VEGFA-KDR, CXCL12-CXCR4]
+  receiver_positive_proxy: top 20 percent of the stated response-proxy score
+reported_run_configuration:
+  graph_knn: 12
+  model_seed: 20260624
+  score_aggregation: mean incoming event score per receiver
+  context_control_candidate_count: 6000 per LR pair
+  reconstruction_seed: not applicable; deterministic source-table rendering
+released_outputs:
+  source_data: reproducibility/artifacts/real_data_threshold_free/source_data
+  summary_table: reproducibility/artifacts/real_data_threshold_free/source_data/w12_comment9_threshold_free_summary.csv
+  figure_reconstruction: reproducibility/artifacts/real_data_threshold_free/rebuild_figures.py
+  figure_outputs: R13a_ROC, R13b_PrecisionRecall, R13c_AUC
+reconstruction_command: python rebuild_figures.py
+scope_note: This manifest supports regeneration of released figures from source tables and does not provide a public raw-count-to-model-result workflow for CosMx NSCLC.

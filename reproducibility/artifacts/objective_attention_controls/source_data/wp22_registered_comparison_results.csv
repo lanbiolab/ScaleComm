@@ -1,0 +1,26 @@
+figure,analysis,metric,method,value
+R1,Clean BCE,Event-level AUPR,ScaleComm diffusion encoder,0.5184
+R1,Clean BCE,Event-level AUPR,Matched GAT,0.4231
+R1,BCE + non-scale auxiliary encoder audit,Event-level AUPR,ScaleComm diffusion encoder,0.5876
+R1,BCE + non-scale auxiliary encoder audit,Event-level AUPR,Matched GAT,0.5701
+R1,System-control audit,Event-level AUPR,ScaleComm full,0.6231
+R1,System-control audit,Event-level AUPR,ScaleComm diffusion encoder control,0.5502
+R1,System-control audit,Event-level AUPR,Matched GAT control,0.3543
+R2,Paired scale-target KL audit,Event-level AUPR,BCE-only,0.4921
+R2,Paired scale-target KL audit,Event-level AUPR,BCE + scale-target KL,0.5193
+R2,Full-objective scale-target KL audit,Event-level AUPR,Full ScaleComm,0.6231
+R2,Full-objective scale-target KL audit,Event-level AUPR,Full minus scale-target KL,0.5529
+R3,Truth-blinded overall,Event-level AUPR,ScaleComm full,0.1835
+R3,Truth-blinded overall,Event-level AUPR,Matched GAT + auxiliary,0.0956
+R3,Truth-blinded contact,Event-level AUPR,ScaleComm full,0.3092
+R3,Truth-blinded contact,Event-level AUPR,Matched GAT + auxiliary,0.1351
+R3,Truth-blinded short-range,Event-level AUPR,ScaleComm full,0.3172
+R3,Truth-blinded short-range,Event-level AUPR,Matched GAT + auxiliary,0.1375
+R3,Truth-blinded medium-range,Event-level AUPR,ScaleComm full,0.2626
+R3,Truth-blinded medium-range,Event-level AUPR,Matched GAT + auxiliary,0.1667
+R3,Truth-blinded long-niche,Event-level AUPR,ScaleComm full,0.1618
+R3,Truth-blinded long-niche,Event-level AUPR,Matched GAT + auxiliary,0.1086
+R3,Truth-blinded error profile,Wrong-range false-positive rate,ScaleComm full,0.1485
+R3,Truth-blinded error profile,Wrong-range false-positive rate,Matched GAT + auxiliary,0.1549
+R3,Truth-blinded error profile,Wrong-niche false-positive rate,ScaleComm full,0.0101
+R3,Truth-blinded error profile,Wrong-niche false-positive rate,Matched GAT + auxiliary,0.0256

@@ -1,0 +1,25 @@
+setting,method,mode_label,mode_recall_at_global_top5pct,mode_f1_at_global_top5pct
+Lymph node / clean,ScaleComm,Contact,0.5431726907630522,0.6819327731092437
+Lymph node / clean,ScaleComm,Short-range,0.1441176470588235,0.2446330504243634
+Lymph node / clean,ScaleComm,Medium-range,0.0693161675529433,0.1269326044247031
+Lymph node / clean,ScaleComm,Long-niche,0.0905499113046282,0.1619322278298486
+Melanoma / clean,ScaleComm,Contact,0.7425373134328358,0.7720659553831232
+Melanoma / clean,ScaleComm,Short-range,0.224907063197026,0.3427762039660056
+Melanoma / clean,ScaleComm,Medium-range,0.6675546084176878,0.5513751375137513
+Melanoma / clean,ScaleComm,Long-niche,0.2461439588688946,0.3837675350701403
+Lymph node / low noise,ScaleComm,Contact,0.3042168674698795,0.4560963371801305
+Lymph node / low noise,ScaleComm,Short-range,0.0654901960784313,0.121498726809749
+Lymph node / low noise,ScaleComm,Medium-range,0.1933016139565258,0.2972527078401836
+Lymph node / low noise,ScaleComm,Long-niche,0.0286244154168682,0.0549918673998915
+Lymph node / high noise,ScaleComm,Contact,0.2761044176706827,0.4217791411042945
+Lymph node / high noise,ScaleComm,Short-range,0.0511764705882352,0.0965058236272878
+Lymph node / high noise,ScaleComm,Medium-range,0.2170911465621793,0.3300943329314135
+Lymph node / high noise,ScaleComm,Long-niche,0.0301564263828414,0.0579979840272931
+Melanoma / low noise,ScaleComm,Contact,0.6660447761194029,0.6972656250000001
+Melanoma / low noise,ScaleComm,Short-range,0.3178438661710037,0.4307304785894207
+Melanoma / low noise,ScaleComm,Medium-range,0.6254661694192861,0.5361954784197306
+Melanoma / low noise,ScaleComm,Long-niche,0.2332904884318766,0.3525983487129674
+Melanoma / high noise,ScaleComm,Contact,0.539179104477612,0.5856129685916919
+Melanoma / high noise,ScaleComm,Short-range,0.3494423791821561,0.4382284382284382
+Melanoma / high noise,ScaleComm,Medium-range,0.5018646776771444,0.4508255563531945
+Melanoma / high noise,ScaleComm,Long-niche,0.2853470437017995,0.4105409153952843

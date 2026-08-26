@@ -1,0 +1,12 @@
+{
+  "purpose": "Exact common top-5% candidate-budget comparison across six locked settings.",
+  "source": "outputs/revision_r1_item04_mode_specific_benchmark_v1/wp4_per_setting_mode_metrics.csv",
+  "selection": "exactly ceil(0.05 * n_candidates) events per method-setting with candidate-id deterministic tie breaking",
+  "metrics": [
+    "overall_f1_at_global_top5pct",
+    "overall_precision_at_global_top5pct",
+    "overall_recall_at_global_top5pct",
+    "overall_empirical_fdr_at_global_top5pct"
+  ],
+  "uncertainty": "paired bootstrap percentile intervals over six setting-level ScaleComm-minus-baseline differences; descriptive, no hypothesis-test claim"
+}

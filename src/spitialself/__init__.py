@@ -4,14 +4,20 @@ from .models import (
     LRModelVisium,
     LRSpecificSAGEModel,
     SpatialSelfRangeContextModel,
+    SpatialSelfWaveletScaleModel,
     SpatialSelfWaveletModel,
 )
 from .model_factory import build_model
+
+# Public compatibility alias for the current ScaleComm model.
+ScaleCommModel = SpatialSelfWaveletScaleModel
 
 __all__ = [
     "LRModelVisium",
     "LRSpecificSAGEModel",
     "SpatialSelfRangeContextModel",
+    "SpatialSelfWaveletScaleModel",
     "SpatialSelfWaveletModel",
+    "ScaleCommModel",
     "build_model",
 ]

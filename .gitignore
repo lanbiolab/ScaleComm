@@ -46,6 +46,11 @@ Reference_Fig/
 /=1.13.3
 *.part
 
+# Reproducibility workflow outputs (generated locally from public input)
+reproducibility/tonsil_a1/work/
+reproducibility/artifacts/*/figures/
+*.egg-info/
+
 # OS/editor
 .DS_Store
 *~

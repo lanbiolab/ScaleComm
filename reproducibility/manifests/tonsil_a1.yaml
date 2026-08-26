@@ -1,0 +1,24 @@
+analysis: SpaMosaic tonsil A1 CXCL13-CXCR5
+reproduction_level: end_to_end
+release_scope: public h5ad to prepared inputs, de novo training, event scoring and receiver validation
+source_data:
+  record: https://doi.org/10.5281/zenodo.18946723
+  required_h5ad: tonsil_A1_rna_adt.h5ad
+workflow: reproducibility/tonsil_a1/run_end_to_end.sh
+fixed_configuration: reproducibility/tonsil_a1/config.yaml
+expected_preparation:
+  n_cells: 2500
+  n_lr_pairs: 7
+  n_candidate_events: 525000
+validated_preparation_checksums:
+  cells.csv: 77c23294b5d9afe065099c22b1bd358a64762e74161f338fc770c103e8df277c
+  expression.csv: 607885d98d31ad3d5c36f35fd48afe9e37d317bfd69d1c84cd5808dea845291e
+  lr_pairs.csv: 6fcda1f656f34db0592b32a398d61db1cb33b6dc1408e9f83c500e1f8e09e801
+  candidate_interactions.csv: 525f85f169df394f270952f8c37be50d265f874b4d6cea9adc43eb90497560b7
+  target_signatures.csv: 37df3f233e25fcfb63bfd6925c4502540149815dec2b93d8b38668d954b2a063
+expected_outputs:
+  - work/results/a1_rich_scalecomm_e200/*__spatialself_wavelet_scale_predictions.csv
+  - work/results/a1_rich_scalecomm_e200/*__spatialself_wavelet_scale_lr_scale_distribution.csv
+  - work/results/a1_rich_scalecomm_e200/tonsil_a1_cxcl13_cxcr5_receiver_validation.csv
+  - work/results/a1_rich_scalecomm_e200/tonsil_a1_cxcl13_cxcr5_validation_metrics.json
+note: Prepared-table hashes were validated with the public A1 h5ad and the released preparation script. Training outputs can vary slightly across supported hardware and library builds.

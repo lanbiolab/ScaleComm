@@ -1,0 +1,20 @@
+analysis: CRC Visium HD receiver-level localization and response-signature audit
+reproduction_level: released-source-data figure reconstruction
+source_dataset: Visium HD colorectal cancer
+analysis_subset:
+  section: CRC
+  receiver_universe: 4280 receiver units
+  focal_lr_axis: TGFB1-TGFBR2
+  positive_proxy: top 200 receiver TGF-response signature values
+reported_run_configuration:
+  graph_knn: 12
+  model_seed: 7
+  score_aggregation: mean incoming event score per receiver
+  reconstruction_seed: not applicable; deterministic source-table rendering
+released_outputs:
+  source_data: reproducibility/artifacts/real_data_threshold_free/source_data
+  summary_table: reproducibility/artifacts/real_data_threshold_free/source_data/w12_comment9_threshold_free_summary.csv
+  figure_reconstruction: reproducibility/artifacts/real_data_threshold_free/rebuild_figures.py
+  figure_outputs: R13a_ROC, R13b_PrecisionRecall, R13c_AUC
+reconstruction_command: python rebuild_figures.py
+scope_note: This manifest supports regeneration of released figures from source tables and does not provide a public raw-count-to-model-result workflow for CRC.

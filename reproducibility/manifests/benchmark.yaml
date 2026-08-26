@@ -1,0 +1,24 @@
+analysis: mechanism-aware semi-synthetic benchmark and matched controls
+reproduction_level: released-source-data figure reconstruction
+source_inputs:
+  backgrounds:
+    - reference_lymph_node_scdesign3_200lr_replicate_00
+    - reference_melanoma_scdesign3_200lr_replicate_00
+  construction: scDesign3 semi-synthetic spatial backgrounds with known event truth
+subset:
+  clean_backgrounds: 2
+  reported_noise_settings: 6
+  lr_panel: 200 simulated ligand-receptor axes
+reported_run_configuration:
+  graph_knn: 12
+  diffusion_steps: [1, 2, 4, 8]
+  training_seed: 7
+  model_identifier: spatialself_wavelet_scale
+  method_terminology: multi-scale graph diffusion
+released_outputs:
+  fixed_budget_source_data: reproducibility/artifacts/fixed_budget_benchmark/source_data
+  objective_control_source_data: reproducibility/artifacts/objective_attention_controls/source_data
+  fixed_budget_reconstruction: reproducibility/artifacts/fixed_budget_benchmark/rebuild_figures.py
+  objective_control_reconstruction: reproducibility/artifacts/objective_attention_controls/rebuild_figures.py
+reconstruction_command: python rebuild_figures.py
+scope_note: Released source tables regenerate the reported benchmark and control figures; the simulator generator and raw generated inputs are not redistributed in this compact release.
