@@ -4,6 +4,16 @@ ScaleComm is a graph-wavelet framework for ligand-receptor-specific spatial scal
 
 The historical Python package path remains `src/spitialself/` for compatibility with existing scripts. New manuscript text and figures use the method name ScaleComm.
 
+## Interactive Result Browser
+
+The repository includes a standalone ScaleComm Explorer for the SpaMosaic tonsil A1 `CXCL13-CXCR5` manuscript case study. It is a read-only interactive view of the same result tables used by revised Figure 6 and supports LR selection, cell-type-pair filtering, event inspection, and PNG/CSV export. Launch it from the repository root:
+
+```bash
+python3 -m http.server 8502 --bind 0.0.0.0 --directory apps/scalecomm_explorer
+```
+
+Open `http://localhost:8502/scalecomm_explorer_tonsil_cxcl13_cxcr5.html`. See [the Explorer README](apps/scalecomm_explorer/README.md) for provenance, controls, exports, and screenshots.
+
 ## Current Structure
 
 ```text
