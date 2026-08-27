@@ -19,7 +19,7 @@ pip install -e .
 The tested environment uses Python 3.12, NumPy 1.26.4, pandas 2.3.3, PyTorch
 2.7.1 and PyTorch Geometric 2.7.0.
 
-## Paper-Linked Tonsil Workflow
+## Tonsil Workflow
 
 The end-to-end SpaMosaic tonsil A1 workflow starts with the public RNA+ADT h5ad
 input and performs preprocessing, candidate construction, weak supervision,
