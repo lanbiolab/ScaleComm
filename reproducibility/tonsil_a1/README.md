@@ -34,7 +34,7 @@ expects an h5ad containing `X`, `obsm['spatial']`, `obsm['protein_counts']` and
 From the repository root:
 
 ```bash
-bash reproducibility/tonsil_a1/run_end_to_end.sh /path/to/tonsil_A1_rna_adt.h5ad cuda
+bash reproducibility/tonsil_a1/run_end_to_end.sh /path/to/tonsil_A1_rna_adt.h5ad cuda --ui
 ```
 
 Use `cpu` as the second argument where CUDA is unavailable. The fixed settings
@@ -42,6 +42,13 @@ are in `config.yaml`: 2,500 cells, preparation seed 17, a 12-NN graph, four
 diffusion depths, training seed 7 and 200 epochs. These are the settings of
 the paper-linked A1 run; they are not a universal recommendation for other
 datasets.
+
+The optional `--ui` flag starts the generic Run Viewer when scoring is complete.
+It reads `cells.csv`, `candidate_interactions.csv`, the prediction CSV and the
+LR scale-profile CSV created by this run. No manuscript source tables are
+required. The terminal prints the local URL; stop the viewer with `Ctrl+C`.
+Install the optional viewer dependencies first with
+`pip install -r apps/spatialself_viewer/requirements.txt`.
 
 The command writes:
 

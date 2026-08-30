@@ -1,14 +1,22 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ $# -lt 1 || $# -gt 2 ]]; then
-  echo "Usage: $0 /path/to/tonsil_A1_rna_adt.h5ad [cuda|cpu]" >&2
+if [[ $# -lt 1 || $# -gt 3 ]]; then
+  echo "Usage: $0 /path/to/tonsil_A1_rna_adt.h5ad [cuda|cpu] [--ui]" >&2
   exit 2
 fi
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 INPUT_H5AD=$1
-DEVICE=${2:-cuda}
+DEVICE=cuda
+UI_ARGS=()
+for arg in "${@:2}"; do
+  case "$arg" in
+    cuda|cpu) DEVICE="$arg" ;;
+    --ui) UI_ARGS+=(--ui) ;;
+    *) echo "Unknown argument: $arg" >&2; exit 2 ;;
+  esac
+done
 WORKFLOW="$ROOT/reproducibility/tonsil_a1"
 PREPARED="$WORKFLOW/work/prepared/spamosaic_tonsil_A1_rich_targets_subset"
 RESULTS="$WORKFLOW/work/results/a1_rich_scalecomm_e200"
@@ -46,7 +54,8 @@ python "$WORKFLOW/run_scalecomm.py" "$PREPARED" \
   --mechanism-guard-loss-weight 0.03 \
   --max-train-samples 12000 \
   --seed 7 \
-  --device "$DEVICE"
+  --device "$DEVICE" \
+  "${UI_ARGS[@]}"
 
 PREDICTION=$(find "$RESULTS" -maxdepth 1 -type f -name '*__spatialself_wavelet_scale_predictions.csv' -print -quit)
 if [[ -z "$PREDICTION" ]]; then

@@ -76,14 +76,14 @@ Run the fixed paper-linked configuration on a CUDA device:
 
 ```bash
 bash reproducibility/tonsil_a1/run_end_to_end.sh \
-  /path/to/tonsil_A1_rna_adt.h5ad cuda
+  /path/to/tonsil_A1_rna_adt.h5ad cuda --ui
 ```
 
 For CPU execution:
 
 ```bash
 bash reproducibility/tonsil_a1/run_end_to_end.sh \
-  /path/to/tonsil_A1_rna_adt.h5ad cpu
+  /path/to/tonsil_A1_rna_adt.h5ad cpu --ui
 ```
 
 The workflow is deterministic up to normal hardware/library floating-point
@@ -105,6 +105,17 @@ variation. Its exact parameters are fixed in
 These settings reproduce the paper-linked A1 analysis protocol. They are not a
 claim that the same K, epoch count, candidate cap or LR panel is optimal for a
 different spatial dataset.
+
+Appending `--ui` starts the generic Run Viewer after the prediction and
+scale-profile exports are written. It reads the standard prepared and result
+files from that same run, so no manuscript source tables or manual viewer setup
+are needed. The command prints the local viewer URL and remains attached until
+the viewer is stopped with `Ctrl+C`. Install the optional viewer dependencies
+before using the flag:
+
+```bash
+pip install -r apps/spatialself_viewer/requirements.txt
+```
 
 ## 4. What each stage writes
 
@@ -189,12 +200,12 @@ for key in ['n_cells', 'n_lr_pairs', 'n_candidate_interactions']:
 PY
 ```
 
-Reference SHA256 values for the recorded prepared files and the recorded model
-outputs are in `reproducibility/manifests/tonsil_a1.yaml`. Prepared-table hashes
-should match when the public input release and the tested software environment
-match. De novo model prediction hashes can differ slightly across hardware or
-library builds; use the exported receiver validation statistics as the primary
-cross-platform check.
+Reference SHA256 values for the validated prepared files are in
+`reproducibility/manifests/tonsil_a1.yaml`. Prepared-table hashes should match
+when the public input release and the tested software environment match. De novo
+model predictions can differ slightly across supported hardware or library
+builds; inspect the exported receiver validation statistics rather than treating
+an exact prediction-file hash as a cross-platform requirement.
 
 The compact manuscript receiver table can be checked independently with:
 

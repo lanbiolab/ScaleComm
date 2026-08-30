@@ -1,11 +1,12 @@
 #!/usr/bin/env python
-"""Train SpatialSelf variants on benchmark candidates and score all edges."""
+"""Train ScaleComm on standardized candidates and score all candidate events."""
 
 from __future__ import annotations
 
 import argparse
 import ast
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -2856,6 +2857,14 @@ def main() -> None:
     parser.add_argument("--max-train-samples", type=int, default=12000)
     parser.add_argument("--seed", type=int, default=7)
     parser.add_argument("--device", default="cpu")
+    parser.add_argument(
+        "--ui",
+        action="store_true",
+        help="Start the generic Run Viewer after scoring one prepared dataset.",
+    )
+    parser.add_argument("--ui-host", default="127.0.0.1", help="Host address for --ui.")
+    parser.add_argument("--ui-port", type=int, default=8501, help="Port for --ui.")
+    parser.add_argument("--ui-no-browser", action="store_true", help="Do not open a browser automatically for --ui.")
     args = parser.parse_args()
 
     dataset_root = Path(args.dataset_root)
@@ -2953,7 +2962,26 @@ def main() -> None:
             ]
         ].to_string(index=False)
     )
-    print(f"Wrote SpatialSelf outputs to {output_dir}")
+    print(f"Wrote ScaleComm outputs to {output_dir}")
+    if args.ui:
+        if len(replicate_dirs) != 1:
+            raise SystemExit("--ui requires one prepared dataset directory. Launch the viewer separately for each replicate output.")
+        launcher = PROJECT_ROOT / "apps" / "spatialself_viewer" / "launch_run_viewer.py"
+        command = [
+            sys.executable,
+            str(launcher),
+            "--prepared-dir",
+            str(replicate_dirs[0].resolve()),
+            "--results-dir",
+            str(output_dir.resolve()),
+            "--host",
+            args.ui_host,
+            "--port",
+            str(args.ui_port),
+        ]
+        if args.ui_no_browser:
+            command.append("--no-browser")
+        subprocess.run(command, check=True)
 
 
 if __name__ == "__main__":

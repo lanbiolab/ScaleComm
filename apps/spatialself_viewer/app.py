@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Interactive ScaleComm result viewer.
+"""Interactive ScaleComm tonsil result viewer.
 
 The app intentionally reads manuscript source tables instead of recomputing
 model outputs, so it can be used as a lightweight companion to the figures.
@@ -22,7 +22,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 
-ROOT = Path(os.environ.get("SCALECOMM_VIEWER_ROOT", Path(__file__).resolve().parents[2])).resolve()
+ROOT = Path(__file__).resolve().parents[2]
 
 
 @dataclass(frozen=True)
@@ -35,19 +35,12 @@ class DatasetConfig:
 
 
 DATASETS = {
-    "slideseqv2_hpc": DatasetConfig(
-        key="slideseqv2_hpc",
-        label="Slide-seqV2 hippocampus Cxcl12-Cxcr4",
-        source_dir=ROOT / "outputs/current_slideseqv2_hpc_full/figures/slideseqv2_hpc_single_axis_cxcl12_cxcr4_v19_cytosignal_full_interactions/source_data",
-        description="CytoSignal-style complete sending/receiving interaction view for ScaleComm Cxcl12-Cxcr4 results.",
-        kind="slideseq",
-    ),
-    "cosmx_nsclc": DatasetConfig(
-        key="cosmx_nsclc",
-        label="CosMx NSCLC scale/context validation",
-        source_dir=ROOT / "outputs/current_fig5_cosmx_nsclc_scale_context/source_tables",
-        description="ScaleComm predictions, LR scale weights, receiver hotspots, and downstream target support.",
-        kind="cosmx",
+    "spamosaic_tonsil_a1": DatasetConfig(
+        key="spamosaic_tonsil_a1",
+        label="SpaMosaic tonsil A1: CXCL13-CXCR5",
+        source_dir=ROOT / "outputs/current_spamosaic_tonsil_scalecomm_story/source_data",
+        description="Current ScaleComm CXCL13-CXCR5 prediction, scale profile, receiver evidence, and cell-type-pair view used in the manuscript tonsil analysis.",
+        kind="tonsil",
     ),
 }
 
@@ -86,12 +79,13 @@ LR_COLORS = {
     "VEGFA-KDR": "#79B984",
     "CSF1-CSF1R": "#93A0B4",
     "TGFB1-TGFBR2": "#C87370",
+    "CXCL13-CXCR5": "#B85450",
 }
 
 
 def page_style() -> None:
     st.set_page_config(
-        page_title="ScaleComm Viewer",
+        page_title="SpatialSelf Viewer",
         page_icon="SS",
         layout="wide",
         initial_sidebar_state="collapsed",
@@ -302,9 +296,93 @@ def page_style() -> None:
 @st.cache_data(show_spinner=False)
 def load_tables(dataset_key: str) -> dict[str, pd.DataFrame]:
     cfg = DATASETS[dataset_key]
+    if cfg.kind == "tonsil":
+        return load_tonsil_tables(cfg)
     if cfg.kind == "slideseq":
         return load_slideseq_tables(cfg)
     return load_cosmx_tables(cfg)
+
+
+def load_tonsil_tables(cfg: DatasetConfig) -> dict[str, pd.DataFrame]:
+    source = cfg.source_dir
+    standardized = ROOT / "outputs/phase7/functional_cross_platform_validation/goal5_cross_platform_real_data/standardized_inputs/spamosaic_tonsil_A1_rich_targets_subset"
+    rerun = ROOT / "outputs/current_spamosaic_tonsil_scalecomm_rerun/a1_rich_spatialself_wavelet_scale_e200"
+    required = {
+        "cells": source / "panel_a_tonsil_context.csv",
+        "receiver": source / "panel_c_scalecomm_receiver_hotspot.csv",
+        "target": source / "panel_e_target_response_map.csv",
+        "replicate": source / "panel_f_replicate_support.csv",
+        "scale": source / "source_lr_scale_distribution.csv",
+        "pairs": source / "source_sender_receiver_summary.csv",
+        "candidates": standardized / "candidate_interactions.csv",
+        "predictions": rerun / "spamosaic_tonsil_A1_rich_targets_subset__spatialself_wavelet_scale_predictions.csv",
+    }
+    missing = [str(path) for path in required.values() if not path.exists()]
+    if missing:
+        raise FileNotFoundError(f"Missing source table(s): {', '.join(missing)}")
+
+    lr = "CXCL13-CXCR5"
+    cells = pd.read_csv(required["cells"])
+    receiver = pd.read_csv(required["receiver"])
+    target = pd.read_csv(required["target"])
+    replicate = pd.read_csv(required["replicate"])
+    scales = pd.read_csv(required["scale"])
+
+    hotspots = receiver[["cell_id", "cell_type", "niche", "x_plot", "y_plot", "incoming_score", "incoming_norm", "top_receiver", "lr_pair"]].merge(
+        target[["cell_id", "target_score", "target_score_norm"]], on="cell_id", how="left"
+    )
+    hotspots = hotspots.rename(
+        columns={
+            "lr_pair": "LR",
+            "incoming_score": "receiver_activity",
+            "top_receiver": "is_top_receiver",
+        }
+    )
+    hotspots["target_score"] = pd.to_numeric(hotspots["target_score"], errors="coerce").fillna(0.0)
+    hotspots["receiver_activity"] = pd.to_numeric(hotspots["receiver_activity"], errors="coerce").fillna(0.0)
+    hotspots["is_top_receiver"] = hotspots["is_top_receiver"].astype(bool)
+
+    candidate_columns = [
+        "candidate_id", "sender_id", "receiver_id", "ligand", "receptor", "mechanism", "distance",
+        "sender_cell_type", "receiver_cell_type", "sender_niche", "receiver_niche",
+    ]
+    candidates = pd.read_csv(required["candidates"], usecols=candidate_columns)
+    candidates["LR"] = candidates["ligand"].astype(str) + "-" + candidates["receptor"].astype(str)
+    candidates = candidates[candidates["LR"].eq(lr)].copy()
+    predictions = pd.read_csv(required["predictions"], usecols=["candidate_id", "score"])
+    scored = candidates.merge(predictions, on="candidate_id", how="inner")
+
+    scale_row = scales[(scales["section"].eq("A1")) & (scales["lr_pair"].eq(lr))].iloc[0].copy()
+    replicate_row = replicate[(replicate["section"].eq("A1")) & (replicate["lr_pair"].eq(lr))].iloc[0]
+    top_edges = scored.nlargest(300, "score")
+    ranking = pd.DataFrame([{
+        "LR": lr,
+        "mechanism": "long-range chemokine niche",
+        "biological_category": "chemokine",
+        "scale_class": "diffusion-derived support profile",
+        "active_niche": "germinal-center proxy",
+        "top_receiver_niche_mode": "germinal-center proxy",
+        "mean_score": float(scored["score"].mean()),
+        "q95_score": float(scored["score"].quantile(0.95)),
+        "max_score": float(scored["score"].max()),
+        "target_spearman_r": float(replicate_row["spearman_incoming_target"]),
+        "top_receiver_target_lift": float(replicate_row["target_lift_top_vs_background"]),
+        "top_median_distance": float(top_edges["distance"].median()),
+        "top_niche_match_rate": float(replicate_row["top_receiver_gc_fraction"]),
+        "broad_weight": float(scale_row["broad_weight"]),
+        "local_weight": float(scale_row["local_weight"]),
+        **{f"scale_{idx}": float(scale_row[f"scale_{idx}"]) for idx in range(6)},
+    }])
+    return {
+        "cells": cells,
+        "hotspots": hotspots,
+        "scored": scored,
+        "interactions": scored,
+        "ranking": ranking,
+        "summary": ranking,
+        "support": pd.DataFrame(),
+        "pair_summary": pd.read_csv(required["pairs"]),
+    }
 
 
 def load_cosmx_tables(cfg: DatasetConfig) -> dict[str, pd.DataFrame]:
@@ -1179,7 +1257,7 @@ def render_clickable_3d_figure(fig: go.Figure, *, height: int = 730) -> None:
       <aside id="spatialself-detail" style="border:1px solid #E2E6EA;background:#FBFCFD;padding:14px 14px 12px 14px;color:#20272c;overflow:hidden;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
           <div>
-            <div style="font-size:10px;color:#6D777F;text-transform:uppercase;letter-spacing:.05em;">ScaleComm selection</div>
+            <div style="font-size:10px;color:#6D777F;text-transform:uppercase;letter-spacing:.05em;">SpatialSelf selection</div>
             <div id="ss-detail-title" style="font-size:15px;font-weight:700;color:#20272c;margin-top:3px;line-height:1.25;">Cxcl12-Cxcr4 overview</div>
           </div>
           <div id="ss-detail-badge" style="border:1px solid #DDE3E8;background:#FFFFFF;color:#68747D;font-size:10px;padding:4px 6px;white-space:nowrap;">overview</div>
@@ -1912,14 +1990,21 @@ def lr_status_markup(row: pd.Series) -> str:
 
 def main() -> None:
     page_style()
+    dataset_keys = list(DATASETS.keys())
     dataset_key = st.sidebar.selectbox(
         "Dataset",
-        list(DATASETS.keys()),
+        dataset_keys,
         index=0,
         format_func=lambda key: DATASETS[key].label,
     )
-    tables = load_tables(dataset_key)
     cfg = DATASETS[dataset_key]
+    try:
+        tables = load_tables(dataset_key)
+    except FileNotFoundError as exc:
+        st.error(f"The source tables for {cfg.label} are not available in this checkout.")
+        st.info("Select CosMx NSCLC scale/context validation to explore the distributed interactive result tables.")
+        st.caption(str(exc))
+        return
 
     ranking = tables["ranking"]
     sort_default = "Target correlation"
@@ -1930,11 +2015,11 @@ def main() -> None:
         "<div class='topbar'>"
         "<div>"
         "<div class='topbar-title'>ScaleComm interactive communication browser</div>"
-        "<div class='topbar-sub'>Spatial communication map, cell-type pair summary, and receiver response evidence.</div>"
+        "<div class='topbar-sub'>SpaMosaic tonsil A1 CXCL13-CXCR5: spatial event map, cell-type-pair summary, and receiver evidence.</div>"
         "</div>"
         "<div class='topbar-badges'>"
         f"<span class='topbar-badge'>{cfg.label}</span>"
-        "<span class='topbar-badge'>ScaleComm only</span>"
+        "<span class='topbar-badge'>current ScaleComm rerun</span>"
         "<span class='topbar-badge'>zoom / hover / export</span>"
         "</div>"
         "</div>",
@@ -1948,16 +2033,11 @@ def main() -> None:
 
     with side_col:
         st.markdown("<div class='control-card'>", unsafe_allow_html=True)
-        st.markdown("<div class='control-label'>Ligand-receptor axis</div>", unsafe_allow_html=True)
-        sort_by = st.selectbox("Sort by", ["Target correlation", "Target lift", "Mean score", "Broad scale weight", "Max score"], index=0, label_visibility="collapsed")
-        query = st.text_input("Search LR", placeholder="Search LR, e.g. CXCL12", label_visibility="collapsed")
-        ranked = sort_ranking(ranking, sort_by, query)
-        if ranked.empty:
-            st.warning("No LR pair matches the current search.")
-            return
-        lr_index = int(ranked.index[ranked["LR"].eq(lr_default)][0]) if lr_default in ranked["LR"].values else 0
-        lr = st.selectbox("LR pair", ranked["LR"].tolist(), index=lr_index, label_visibility="collapsed")
+        st.markdown("<div class='control-label'>Manuscript LR axis</div>", unsafe_allow_html=True)
+        ranked = ranking.copy()
+        lr = lr_default
         st.markdown(f"<div class='lr-name' style='color:{LR_COLORS.get(lr, '#263137')}'>{lr}</div>", unsafe_allow_html=True)
+        st.markdown("<div class='small-note'>SpaMosaic tonsil A1; current ScaleComm rerun used for the manuscript case study.</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
         row = lr_row(ranking, lr)
@@ -1966,7 +2046,22 @@ def main() -> None:
 
         st.markdown("<div class='control-card'>", unsafe_allow_html=True)
         st.markdown("<div class='control-label'>Cell-type pair</div>", unsafe_allow_html=True)
-        if cfg.kind == "slideseq":
+        map_scored = scored
+        if cfg.kind == "tonsil":
+            pair_summary = tables["pair_summary"].copy()
+            pair_summary["pair"] = pair_summary["sender_cell_type"].astype(str) + " -> " + pair_summary["receiver_cell_type"].astype(str)
+            pair_options = pair_summary.sort_values(["mean_score", "n_edges"], ascending=False)["pair"].tolist()
+            selected_pair = st.selectbox("Cell-type communication", pair_options, index=0)
+            map_scored = scored[
+                scored["sender_cell_type"].astype(str).str.cat(scored["receiver_cell_type"].astype(str), sep=" -> ").eq(selected_pair)
+            ].copy()
+            top_n_edges = st.slider("Communication lines", min_value=10, max_value=125, value=60, step=5)
+            color_by = st.radio("Receiver overlay", ["Target signature", "Receiver activity"], horizontal=True)
+            t1, t2, t3 = st.columns(3)
+            show_edges = t1.toggle("lines", value=True)
+            show_hotspots = t2.toggle("hotspots", value=True)
+            show_cell_types = t3.toggle("types", value=True)
+        elif cfg.kind == "slideseq":
             top_n_edges = len(tables.get("interactions", scored))
             color_by = "Target signature"
             show_edges = True
@@ -2018,7 +2113,7 @@ def main() -> None:
             st.markdown("<div class='section-head'>Receiver response support</div>", unsafe_allow_html=True)
             st.plotly_chart(make_response_scatter(hot, lr), use_container_width=True, config={"displayModeBar": False})
             st.markdown("<div class='section-head'>Top predicted edges</div>", unsafe_allow_html=True)
-            st.markdown(edge_summary_markup(scored), unsafe_allow_html=True)
+            st.markdown(edge_summary_markup(map_scored), unsafe_allow_html=True)
 
     with main_col:
         if cfg.kind == "slideseq":
@@ -2052,7 +2147,7 @@ def main() -> None:
             main_fig = make_communication_view(
                 tables["cells"],
                 hot,
-                scored,
+                map_scored,
                 lr,
                 top_n=top_n_edges,
                 color_by=color_by,
@@ -2074,7 +2169,7 @@ def main() -> None:
     with st.expander("Source tables and downloads", expanded=False):
         tab_edges, tab_tables, tab_downloads = st.tabs(["Top edges", "LR table", "Downloads"])
         with tab_edges:
-            st.dataframe(selected_edge_table(scored), use_container_width=True, height=300)
+            st.dataframe(selected_edge_table(map_scored), use_container_width=True, height=300)
         with tab_tables:
             st.dataframe(selected_summary_table(ranked), use_container_width=True, height=440)
         with tab_downloads:
@@ -2086,8 +2181,8 @@ def main() -> None:
             )
             st.download_button(
                 "Download selected LR candidate edges",
-                data=scored.sort_values("score", ascending=False).to_csv(index=False).encode("utf-8"),
-                file_name=f"{dataset_key}_{lr.replace('-', '_')}_candidate_edges.csv",
+                data=map_scored.sort_values("score", ascending=False).to_csv(index=False).encode("utf-8"),
+                file_name=f"{dataset_key}_{lr.replace('-', '_')}_selected_cell_type_pair_edges.csv",
                 mime="text/csv",
             )
             st.download_button(
