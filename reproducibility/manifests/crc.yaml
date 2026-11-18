@@ -7,3 +7,11 @@ analyses:
 source_data: reproducibility/artifacts/real_data_threshold_free/source_data
 figure_reconstruction: reproducibility/artifacts/real_data_threshold_free/rebuild_figures.py
 configuration: Exact reported configurations, source-table provenance and receiver counts are retained in the source-data manifests.
+raw_to_result_workflow:
+  accession: GSM8594568
+  section: P2CRC
+  tutorial: reproducibility/crc_p2/README.md
+  entrypoint: reproducibility/crc_p2/run_end_to_end.sh
+  preparation_seed: 33
+  training_seed: 20260624
+  reference: reproducibility/artifacts/real_data_threshold_free/source_data/w12_receiver_scores.csv

@@ -2,9 +2,9 @@
 
 ScaleComm prioritizes candidate ligand-receptor sender-receiver events in
 spatial transcriptomics data using LR-specific multi-scale graph-diffusion
-context. This repository provides one paper-linked raw-to-result SpaMosaic
-tonsil workflow, released source data with figure-reconstruction scripts for
-the remaining reported analyses, and an interactive result Explorer.
+context. The repository includes workflows for training on SpaMosaic tonsil A1 and
+Visium HD P2 colorectal cancer, source tables and figure-reconstruction
+scripts, and an interactive result Explorer.
 
 ## Quick Start
 
@@ -53,6 +53,13 @@ Check the compact versioned tonsil receiver table with:
 ```bash
 python reproducibility/verify_reported_statistics.py
 ```
+
+## Colorectal cancer workflow
+
+[Reproduce the P2CRC analysis](reproducibility/crc_p2/README.md) from the
+three public GEO files for sample GSM8594568. The workflow constructs
+candidates, trains ScaleComm and compares the TGFB1–TGFBR2 receiver ranking
+with the released table. It reports rank concordance and top-5% overlap.
 
 ## Reproducing Reported Analyses
 

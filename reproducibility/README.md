@@ -6,7 +6,7 @@ released source-data tables and figure-reconstruction scripts.
 | Analysis | Resources | Entry point |
 | --- | --- | --- |
 | SpaMosaic tonsil A1 | Public h5ad preparation, candidate construction, de novo ScaleComm training, validation and figure-ready export | `tonsil_a1/README.md` |
-| CRC Visium HD | Dataset manifest, released source data and receiver-localization reconstruction | `manifests/crc.yaml` |
+| CRC Visium HD | Prepare public P2CRC counts and coordinates, retrain, and compare receiver scores with the released table | [P2CRC workflow](crc_p2/README.md) |
 | MERFISH DSS | Dataset manifest, released source data and stage-specific reconstruction | `manifests/dss.yaml` |
 | CosMx NSCLC | Dataset manifest, released source data and spatial-control reconstruction | `manifests/nsclc.yaml` |
 | Semi-synthetic benchmark | Benchmark source data, reported outputs, evaluation tables and figure reconstruction | `manifests/benchmark.yaml` |
