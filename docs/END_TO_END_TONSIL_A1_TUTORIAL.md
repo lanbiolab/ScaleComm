@@ -37,7 +37,7 @@ compatible with it in the tested environment.
 
 For a CPU-only machine, install a PyTorch build appropriate for the local CPU
 environment and pass `cpu` to the workflow command below. A GPU is recommended
-for the 2,500-cell, 200-epoch paper-linked configuration.
+for the 2,500-cell A1 workflow.
 
 ## 2. Obtain and inspect the public input
 
@@ -72,7 +72,7 @@ PY
 
 ## 3. Run the complete workflow
 
-Run the fixed paper-linked configuration on a CUDA device:
+Run the seed-17 example on a CUDA device:
 
 ```bash
 bash reproducibility/tonsil_a1/run_end_to_end.sh \
@@ -86,25 +86,22 @@ bash reproducibility/tonsil_a1/run_end_to_end.sh \
   /path/to/tonsil_A1_rna_adt.h5ad cpu --ui
 ```
 
-The workflow is deterministic up to normal hardware/library floating-point
-variation. Its exact parameters are fixed in
-`reproducibility/tonsil_a1/config.yaml`:
+The example parameters are listed in `reproducibility/tonsil_a1/config.yaml`.
+Append `--paper` for 200 epochs with seed 7. Repeated GPU training can give
+different scores. The [seed comparison](../reproducibility/training_seed_examples.md)
+reports measurements from the training-seed experiment.
 
-| Component | Paper-linked A1 setting |
+| Component | Default example setting |
 | --- | --- |
 | Selected cells | 2,500 |
 | Preparation seed | 17 |
 | Cell-level graph | 12-nearest-neighbor graph |
 | Diffusion depths | 1, 2, 4, 8 graph propagation steps |
-| Training seed | 7 |
-| Training epochs | 200 |
+| Training seed | 17 |
+| Training epochs | 1,000 |
 | LR panel | 7 documented tonsil axes |
 | Weak-supervision strategy | `mechanism_niche_expression_distance` |
 | Maximum training events | 12,000 |
-
-These settings reproduce the paper-linked A1 analysis protocol. They are not a
-claim that the same K, epoch count, candidate cap or LR panel is optimal for a
-different spatial dataset.
 
 Appending `--ui` starts the generic Run Viewer after the prediction and
 scale-profile exports are written. It reads the standard prepared and result
@@ -157,7 +154,7 @@ candidate event in batches.
 It writes:
 
 ```text
-reproducibility/tonsil_a1/work/results/a1_rich_scalecomm_e200/
+reproducibility/tonsil_a1/work/results/a1_rich_scalecomm_e1000/
   spamosaic_tonsil_A1_rich_targets_subset__spatialself_wavelet_scale_predictions.csv
   spamosaic_tonsil_A1_rich_targets_subset__spatialself_wavelet_scale_lr_scale_distribution.csv
   spamosaic_tonsil_A1_rich_targets_subset__spatialself_wavelet_scale_metrics.json
@@ -243,7 +240,7 @@ not rerun the model and does not modify scores.
 | `anndata`/NumPy import error | Create the supplied conda environment; do not use NumPy 2.x. |
 | Missing `protein_counts` or `spatial` | Confirm that the selected SpaMosaic RNA+ADT h5ad object, not an RNA-only derivative, was downloaded. |
 | Missing LR gene | Verify gene symbols in `var_names`; the released LR panel requires the documented ligand and receptor genes. |
-| CUDA unavailable | Use `cpu`; expect a longer 200-epoch training run. |
+| CUDA unavailable | Use `cpu`; expect a longer training run. |
 | Output filename differs | The runner names files from the prepared-directory name. The wrapper discovers the prediction file automatically before validation. |
 | Result differs slightly from recorded file | Check the environment, source data version, seeds and config first. Floating-point/model-training variation can change individual scores across hardware. |
 

@@ -13,5 +13,7 @@ raw_to_result_workflow:
   tutorial: reproducibility/crc_p2/README.md
   entrypoint: reproducibility/crc_p2/run_end_to_end.sh
   preparation_seed: 33
-  training_seed: 20260624
+  training_seed: 17
+  epochs: 1000
+  paper_training_overrides: {training_seed: 20260624, epochs: 200}
   reference: reproducibility/artifacts/real_data_threshold_free/source_data/w12_receiver_scores.csv

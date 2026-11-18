@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from scipy.stats import spearmanr
+from sklearn.metrics import roc_auc_score
 
 
 def main():
@@ -14,6 +15,8 @@ def main():
         parser.add_argument(arg, type=Path)
     parser.add_argument("--check-reference", action="store_true",
                         help="Check the paper-linked CRC replay against its reference.")
+    parser.add_argument("--check-cohort", action="store_true",
+                        help="Verify the paper cohort sizes for a fresh training example.")
     args = parser.parse_args()
 
     candidates = pd.read_csv(args.prepared / "candidate_interactions.csv",
@@ -43,6 +46,21 @@ def main():
               "n_receivers": len(paired), "spearman_rank_correlation": rho,
               "max_absolute_score_difference":
                   float((paired["retrained_score"] - paired["reference_score"]).abs().max())}
+    if args.check_cohort or args.check_reference:
+        signatures = pd.read_csv(args.prepared / "target_signatures.csv")
+        focal = signatures.loc[signatures["ligand"].eq("TGFB1") & signatures["receptor"].eq("TGFBR2")]
+        genes = [g for g in focal["target_genes"].item().split(",") if g not in {"TGFB1", "TGFBR2"}]
+        expression = pd.read_csv(args.prepared / "expression.csv", usecols=["cell_id", *genes])
+        expression = expression.set_index("cell_id", verify_integrity=True).sort_index()
+        if len(expression) != 6000 or len(set(genes)) != 13 or not result.index.isin(expression.index).all():
+            raise ValueError("Expected the full P2CRC cohort and its 13-gene response panel.")
+        activity = np.log1p(expression[genes]).mean(axis=1)
+        hotspots = activity.sort_values(ascending=False, kind="stable").head(200).index
+        incoming = result.reindex(activity.index, fill_value=0.0)
+        report["full_cohort_receivers"] = len(activity)
+        report["response_hotspots"] = len(hotspots)
+        report["receiver_response_spearman"] = float(spearmanr(incoming, activity).statistic)
+        report["response_hotspot_auroc"] = float(roc_auc_score(activity.index.isin(hotspots), incoming))
     # Fix the list length and break tied scores by barcode in both rankings.
     n_top = int(np.ceil(0.05 * len(paired)))
     top_retrained = set(paired.sort_values(
@@ -59,10 +77,12 @@ def main():
     summary = json.dumps(report, indent=2, allow_nan=False)
     (args.output / "receiver_comparison.json").write_text(summary + "\n", encoding="utf8")
     print(summary)
-    if args.check_reference:
+    if args.check_reference or args.check_cohort:
         expected_counts = (91345, 12864, 4280)
         observed_counts = (report["n_candidates"], report["n_focal_events"], report["n_receivers"])
-        if observed_counts != expected_counts or rho < 0.99:
+        if observed_counts != expected_counts:
+            raise SystemExit(f"Unexpected CRC cohort sizes: {observed_counts}")
+        if args.check_reference and rho < 0.99:
             raise SystemExit("CRC replay differs from its reference. See receiver_comparison.json.")
 
 

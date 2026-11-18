@@ -1,34 +1,46 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ $# -lt 1 || $# -gt 3 ]]; then
-  echo "Usage: $0 /path/to/tonsil_A1_rna_adt.h5ad [cuda|cpu] [--ui]" >&2
+if [[ $# -lt 1 || $# -gt 4 ]]; then
+  echo "Usage: $0 /path/to/tonsil_A1_rna_adt.h5ad [cuda|cpu] [--ui] [--paper]" >&2
   exit 2
 fi
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 INPUT_H5AD=$1
 DEVICE=cuda
-UI_ARGS=()
+SHOW_UI=false
+TRAIN_SEED=17
+EPOCHS=1000
 for arg in "${@:2}"; do
   case "$arg" in
     cuda|cpu) DEVICE="$arg" ;;
-    --ui) UI_ARGS+=(--ui) ;;
+    --ui) SHOW_UI=true ;;
+    --paper) TRAIN_SEED=7; EPOCHS=200 ;;
     *) echo "Unknown argument: $arg" >&2; exit 2 ;;
   esac
 done
 WORKFLOW="$ROOT/reproducibility/tonsil_a1"
+REFERENCE="$WORKFLOW/work/prepared/spamosaic_tonsil_A1_subset"
 PREPARED="$WORKFLOW/work/prepared/spamosaic_tonsil_A1_rich_targets_subset"
-RESULTS="$WORKFLOW/work/results/a1_rich_scalecomm_e200"
+RESULTS="$WORKFLOW/work/results/a1_rich_scalecomm_e${EPOCHS}"
 
 python "$WORKFLOW/prepare_tonsil_a1.py" \
   --input-h5ad "$INPUT_H5AD" \
-  --output-dir "reproducibility/tonsil_a1/work/prepared/spamosaic_tonsil_A1_rich_targets_subset" \
-  --dataset-id spamosaic_tonsil_A1_rich_targets_subset \
+  --output-dir "$REFERENCE" \
+  --dataset-id spamosaic_tonsil \
   --n-cells 2500 \
   --seed 17 \
   --max-neighbors 30 \
   --max-candidates-per-lr 90000 \
+  --target-profile compact
+
+# The recorded rich-target run reuses the original cells and candidate IDs.
+python "$WORKFLOW/prepare_tonsil_a1.py" \
+  --input-h5ad "$INPUT_H5AD" \
+  --output-dir "$PREPARED" \
+  --reference-dataset-dir "$REFERENCE" \
+  --dataset-id spamosaic_tonsil_A1_subset \
   --target-profile rich
 
 python "$WORKFLOW/run_scalecomm.py" "$PREPARED" \
@@ -38,7 +50,7 @@ python "$WORKFLOW/run_scalecomm.py" "$PREPARED" \
   --diffusion-steps 1 2 4 8 \
   --h-dim 64 \
   --lr-dim 24 \
-  --epochs 200 \
+  --epochs "$EPOCHS" \
   --learning-rate 0.001 \
   --positive-quantile 0.90 \
   --negative-quantile 0.20 \
@@ -53,9 +65,8 @@ python "$WORKFLOW/run_scalecomm.py" "$PREPARED" \
   --lr-scale-target-strategy ranklocal \
   --mechanism-guard-loss-weight 0.03 \
   --max-train-samples 12000 \
-  --seed 7 \
-  --device "$DEVICE" \
-  "${UI_ARGS[@]}"
+  --seed "$TRAIN_SEED" \
+  --device "$DEVICE"
 
 PREDICTION=$(find "$RESULTS" -maxdepth 1 -type f -name '*__spatialself_wavelet_scale_predictions.csv' -print -quit)
 if [[ -z "$PREDICTION" ]]; then
@@ -67,3 +78,9 @@ python "$WORKFLOW/validate_tonsil_a1.py" \
   --prepared-dir "$PREPARED" \
   --prediction "$PREDICTION" \
   --output-dir "$RESULTS"
+
+if [[ "$SHOW_UI" == true ]]; then
+  python "$ROOT/apps/spatialself_viewer/launch_run_viewer.py" \
+    --prepared-dir "$PREPARED" \
+    --results-dir "$RESULTS"
+fi

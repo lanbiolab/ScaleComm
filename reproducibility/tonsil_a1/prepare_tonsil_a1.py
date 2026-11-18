@@ -529,7 +529,7 @@ def _target_signature_table(
                 "target_genes": ",".join(targets),
                 "targets": ",".join(targets),
                 "target_source": "phase7_spamosaic_tonsil_curated_context_targets",
-                "evidence_note": "Curated tonsil target-response proxy using genes present in the SpaMosaic RNA panel.",
+                "evidence_note": "Curated tonsil target-response proxy using genes present in the SPAMOSAIC RNA panel.",
             }
         )
     return pd.DataFrame(rows)

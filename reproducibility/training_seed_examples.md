@@ -1,6 +1,6 @@
 # Seed sensitivity at 1,000 training epochs
 
-These GPU runs use the archived model inputs and the paper workflow settings for each tissue, with training extended to 1,000 epochs. For each dataset we evaluated its original training seed and two additional seeds (17 and 42). The comparison criterion was the absolute difference from the archived receiver score–response Spearman correlation. Seed 17 was selected **after comparing these three runs** as the closest example in each tissue. The paper workflows retain their original 200-epoch settings.
+These GPU runs use the archived model inputs and the paper workflow settings for each tissue, with training extended to 1,000 epochs. For each dataset we evaluated its original training seed and two additional seeds (17 and 42). The comparison criterion was the absolute difference from the archived receiver score–response Spearman correlation. Seed 17 was selected **after comparing these three runs** as the closest example in each tissue. The [A1](tonsil_a1/README.md) and [P2CRC](crc_p2/README.md) end-to-end workflows default to this 1,000-epoch example. Both accept `--paper` to reproduce the original 200-epoch configuration.
 
 ## Tonsil A1 · CXCL13–CXCR5
 

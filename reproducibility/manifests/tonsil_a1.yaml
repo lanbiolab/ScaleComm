@@ -18,4 +18,4 @@ reference_checksums:
 reference_model_outputs:
   predictions.csv: 5f5d7e9507e80e0e219381b33290fcdf127be40a5aa8df65876dd426b1d228cc
   lr_scale_distribution.csv: b35f01a97af8cb44d253732540448e8a0ad1dce6abc2a4a645b7a5ea7e37c6e5
-note: Prediction hashes are a reference for the recorded environment. Cross-platform training may differ slightly.
+note: The prediction and scale-distribution hashes identify the archived paper run. Fresh training can give different scores.

@@ -15,9 +15,9 @@ graph:
   knn: 12
   diffusion_steps: [1, 2, 4, 8]
 training:
-  seed: 7
+  seed: 17
   device: cuda
-  epochs: 200
+  epochs: 1000
   learning_rate: 0.001
   hidden_dim: 64
   lr_embedding_dim: 24
@@ -36,5 +36,8 @@ training:
   mechanism_guard_loss_weight: 0.03
 outputs:
   prepared_dir: work/prepared/spamosaic_tonsil_A1_rich_targets_subset
-  run_dir: work/results/a1_rich_scalecomm_e200
+  run_dir: work/results/a1_rich_scalecomm_e1000
   top_receivers: 300
+paper_training_overrides:
+  seed: 7
+  epochs: 200

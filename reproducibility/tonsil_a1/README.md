@@ -37,11 +37,10 @@ From the repository root:
 bash reproducibility/tonsil_a1/run_end_to_end.sh /path/to/tonsil_A1_rna_adt.h5ad cuda --ui
 ```
 
-Use `cpu` as the second argument where CUDA is unavailable. The fixed settings
-are in `config.yaml`: 2,500 cells, preparation seed 17, a 12-NN graph, four
-diffusion depths, training seed 7 and 200 epochs. These are the settings of
-the paper-linked A1 run; they are not a universal recommendation for other
-datasets.
+The default training example runs for 1,000 epochs with seed 17. Append
+`--paper` to select the 200-epoch configuration with training seed 7. Both
+use preparation seed 17 and the same compact-to-rich input construction.
+See the [seed comparison](../training_seed_examples.md) for the measured outcomes.
 
 The optional `--ui` flag starts the generic Run Viewer when scoring is complete.
 It reads `cells.csv`, `candidate_interactions.csv`, the prediction CSV and the
@@ -60,7 +59,7 @@ reproducibility/tonsil_a1/work/prepared/spamosaic_tonsil_A1_rich_targets_subset/
   candidate_interactions.csv
   target_signatures.csv
 
-reproducibility/tonsil_a1/work/results/a1_rich_scalecomm_e200/
+reproducibility/tonsil_a1/work/results/a1_rich_scalecomm_e1000/
   spamosaic_tonsil_A1_rich_targets_subset__spatialself_wavelet_scale_predictions.csv
   spamosaic_tonsil_A1_rich_targets_subset__spatialself_wavelet_scale_lr_scale_distribution.csv
   spamosaic_tonsil_A1_rich_targets_subset__spatialself_wavelet_scale_metrics.json
