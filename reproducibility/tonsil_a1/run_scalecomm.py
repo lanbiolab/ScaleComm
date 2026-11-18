@@ -39,6 +39,9 @@ def _read_background_guard_targets(path: str | Path | None) -> pd.DataFrame | No
     return target
 
 
+DEFAULT_EPOCHS = 1000
+
+
 def run_spatialself_on_replicate(
     replicate_dir: Path,
     output_dir: Path,
@@ -48,7 +51,7 @@ def run_spatialself_on_replicate(
     diffusion_steps: tuple[int, ...] = (1, 2, 4, 8),
     h_dim: int = 64,
     lr_dim: int = 24,
-    epochs: int = 200,
+    epochs: int = DEFAULT_EPOCHS,
     learning_rate: float = 1e-3,
     bce_loss_weight: float = 1.0,
     positive_quantile: float = 0.9,
@@ -2774,7 +2777,7 @@ def main() -> None:
     parser.add_argument("--diffusion-steps", nargs="+", type=int, default=(1, 2, 4, 8))
     parser.add_argument("--h-dim", type=int, default=64)
     parser.add_argument("--lr-dim", type=int, default=24)
-    parser.add_argument("--epochs", type=int, default=200)
+    parser.add_argument("--epochs", type=int, default=DEFAULT_EPOCHS)
     parser.add_argument("--learning-rate", type=float, default=1e-3)
     parser.add_argument("--bce-loss-weight", type=float, default=1.0)
     parser.add_argument("--positive-quantile", type=float, default=0.9)
