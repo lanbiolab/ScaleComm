@@ -91,6 +91,7 @@ def run_formal_fdr_panel(
             group_columns=["lr_id", "ligand", "receptor", "mechanism"],
             config=permutation_config,
             top_fraction=float(config.direct_group_top_fraction),
+            alpha=config.alpha,
         )
         lr_path = output_dir / f"{prediction_stem}__{null_model}__lr_pair_direct_fdr.csv"
         lr_table.to_csv(lr_path, index=False)
@@ -104,6 +105,7 @@ def run_formal_fdr_panel(
             group_columns=cell_type_columns,
             config=permutation_config,
             top_fraction=float(config.direct_group_top_fraction),
+            alpha=config.alpha,
         )
         cell_type_path = output_dir / f"{prediction_stem}__{null_model}__cell_type_pair_direct_fdr.csv"
         cell_type_table.to_csv(cell_type_path, index=False)
@@ -453,6 +455,7 @@ def permutation_group_fdr(
     group_columns: list[str],
     config: PermutationFDRConfig | None = None,
     top_fraction: float = 0.05,
+    alpha: float = 0.05,
 ) -> pd.DataFrame:
     """Compute direct group-level empirical p-values under a permutation null.
 
@@ -501,7 +504,7 @@ def permutation_group_fdr(
     result["group_statistic"] = observed
     result["group_p_value"] = p_values
     result["group_bh_fdr"] = bh_adjust(p_values)
-    result["group_significant"] = result["group_bh_fdr"] <= 0.05
+    result["group_significant"] = result["group_bh_fdr"] <= alpha
     result["n_candidate_edges"] = [int(len(index)) for index in group_indices]
     result["null_mean"] = null_sum / max(config.n_permutations, 1)
     null_var = np.maximum(null_sum_sq / max(config.n_permutations, 1) - result["null_mean"].to_numpy() ** 2, 0.0)
@@ -615,17 +618,9 @@ def _group_indices(
     if not active_columns:
         return [np.arange(len(table))]
 
-    groups = [
-        group_index.to_numpy(dtype=int)
-        for _, group_index in table.reset_index().groupby(active_columns, sort=False)["index"]
-    ]
-    if all(len(group) > 1 for group in groups):
-        return groups
-
-    fallback_columns = [col for col in (fallback or []) if col in table.columns]
-    if fallback_columns and fallback_columns != active_columns:
-        return _group_indices(table, fallback_columns)
-    return [np.arange(len(table))]
+    # Singleton strata remain fixed under a within-stratum permutation.
+    groups = table.reset_index(drop=True).groupby(active_columns, dropna=False, sort=False)
+    return [group.index.to_numpy(dtype=int) for _, group in groups]
 
 
 def _group_indices_with_keys(table: pd.DataFrame, columns: list[str]) -> tuple[list[np.ndarray], list[tuple[object, ...]]]:
