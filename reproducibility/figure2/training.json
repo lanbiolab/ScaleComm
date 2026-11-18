@@ -1,0 +1,29 @@
+{
+  "seed": 7,
+  "epochs": 1000,
+  "learning_rate": 0.001,
+  "positive_quantile": 0.9,
+  "negative_quantile": 0.2,
+  "pseudo_label_strategy": "mechanism_niche_expression_distance",
+  "train_sampling_strategy": "balanced_per_lr",
+  "max_train_samples": 12000,
+  "hard_negative_loss_weight": 0.05,
+  "scale_target_loss_weight": 1.1,
+  "scale_diversity_loss_weight": 0.45,
+  "scale_responsibility_loss_weight": 0.35,
+  "scale_responsibility_margin": 0.35,
+  "scale_responsibility_edges": 2048,
+  "lr_scale_target_strategy": "ranklocal",
+  "mechanism_guard_loss_weight": 0.03,
+  "h_dim": 64,
+  "lr_dim": 24,
+  "model_name": "spatialself_wavelet_scale",
+  "use_spatial_graph": true,
+  "k_nn": 12,
+  "diffusion_steps": [
+    1,
+    2,
+    4,
+    8
+  ]
+}

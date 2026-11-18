@@ -1,0 +1,44 @@
+{
+  "lymph_clean": {
+    "candidate_table_sha256": "5cdf5dd18ff2c6eacc15a25a2e52872a528d01c40b9971720439f2765cd1c9cf",
+    "count": 102725,
+    "score_archive_sha256": "249432fb95d3d5611973dc7d8f4dbd10249005723815f1b0d9985aa4c2f28c6e",
+    "evaluation_table": "lymph_evaluation.csv.gz",
+    "evaluation_table_sha256": "793d01f0361f87fa56bb7e8d1eb30677017e8c173f8ce3a5356e291dab3987b3"
+  },
+  "lymph_low_noise": {
+    "candidate_table_sha256": "3d4e1a1e0fd1c6af59c86617cec27bd03069486cbcb7d7574e81154acf66e1c5",
+    "count": 102725,
+    "score_archive_sha256": "3a313306fb561766e150229c20c619c3eafa3a499c8a04e474cdaea430ea9367",
+    "evaluation_table": "lymph_evaluation.csv.gz",
+    "evaluation_table_sha256": "793d01f0361f87fa56bb7e8d1eb30677017e8c173f8ce3a5356e291dab3987b3"
+  },
+  "lymph_high_noise": {
+    "candidate_table_sha256": "a59dcaf03f909266246628ef30c78d2392e659f232e2fcfaa160e6b268b022ea",
+    "count": 102725,
+    "score_archive_sha256": "c3d51eb19bcde78a76063a4aece5efc9402b6891d2db7b02c1705cb21395826e",
+    "evaluation_table": "lymph_evaluation.csv.gz",
+    "evaluation_table_sha256": "793d01f0361f87fa56bb7e8d1eb30677017e8c173f8ce3a5356e291dab3987b3"
+  },
+  "melanoma_clean": {
+    "candidate_table_sha256": "a408fd3fd2c8745604b4c2604a61b6c43389b77d1adc717a84ed1f7e8cd0cb48",
+    "count": 75418,
+    "score_archive_sha256": "772de7fbda24cb853be2d3ccb0ab94c5bfeffa4b39791d32c318399c9e1ea1ff",
+    "evaluation_table": "melanoma_evaluation.csv.gz",
+    "evaluation_table_sha256": "2b02013a8509e3b728493f303adf3b08b8fb68203361e295893929b9d5c82e4a"
+  },
+  "melanoma_low_noise": {
+    "candidate_table_sha256": "3b2339dbafa7044e1373b240e2c72fd04c47398151e9efc8969753eb2a4a0948",
+    "count": 75418,
+    "score_archive_sha256": "9eaffff84ded453b729d1996346f07957877b1863b44f4e817219ffef8a6387d",
+    "evaluation_table": "melanoma_evaluation.csv.gz",
+    "evaluation_table_sha256": "2b02013a8509e3b728493f303adf3b08b8fb68203361e295893929b9d5c82e4a"
+  },
+  "melanoma_high_noise": {
+    "candidate_table_sha256": "7013e246d067ca0c27f281d067f1ef8349e0eefdecb8db6ef2c19decd7cbdc27",
+    "count": 75418,
+    "score_archive_sha256": "7138499e85ee4ef3c16a38bcdc309d930e72735b5ef67ef2868eab28eef0b7d8",
+    "evaluation_table": "melanoma_evaluation.csv.gz",
+    "evaluation_table_sha256": "2b02013a8509e3b728493f303adf3b08b8fb68203361e295893929b9d5c82e4a"
+  }
+}

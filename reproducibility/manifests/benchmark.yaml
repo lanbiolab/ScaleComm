@@ -6,3 +6,16 @@ released_analyses:
 resources:
   fixed_budget: reproducibility/artifacts/fixed_budget_benchmark
   objective_attention_controls: reproducibility/artifacts/objective_attention_controls
+  end_to_end: reproducibility/figure2/run_end_to_end.py
+  training_configuration: reproducibility/figure2/training.json
+  historical_worksheets: reproducibility/figure2/worksheets.py
+  native_baseline_adapters: reproducibility/figure2/baseline.py
+software:
+  python_environment: reproducibility/environment.yml
+  reference_simulation:
+    R_packages:
+      scDesign3: "1.0.1"
+      SingleCellExperiment: "1.24.0"
+reference_inputs:
+  lymph_node: annotated spatial H5AD with obsm["spatial"] and cell2location abundances in obsm["means_cell_abundance_w_sf"]
+  melanoma: Slide-tags counts (matrix.mtx.gz, features.tsv.gz, barcodes.tsv.gz), HumanMelanomaMultiome_spatial.csv and HumanMelanomaMultiome_metadata.csv
